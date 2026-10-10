@@ -6,7 +6,7 @@ import { getRequestHeaders } from '../../../../script.js';
 import { translate } from '../../../i18n.js';
 
 // Cấu hình kho lưu trữ từ xa
-const REPO_ROOT = "https://raw.githubusercontent.com/uhhhh15/QR/main";
+const REPO_ROOT = "https://raw.githubusercontent.com/TieuTuSi123/QR-vi/main";
 const MANIFEST_URL = `${REPO_ROOT}/manifest.json`;
 const CHANGELOG_URL = `${REPO_ROOT}/CHANGELOG.md`;
 
