@@ -77,7 +77,6 @@ body.qra-enabled #qr--bar .qrq-mixed-content > :not(.qrq-whitelisted-original) {
     z-index: 9998; /* Thấp hơn menu (9999) một cấp */
     background-color: rgba(0, 0, 0, 0.3);
     backdrop-filter: blur(4px);
-    -webkit-backdrop-filter: blur(4px);
     display: none;
     opacity: 0;
     transition: opacity 0.3s ease;
@@ -354,7 +353,6 @@ body.qra-theme-system {
     /* Áp dụng biến - Khóa bắt buộc */
     background: var(--qp-bg) !important;
     backdrop-filter: var(--qp-backdrop) !important;
-    -webkit-backdrop-filter: var(--qp-backdrop) !important;
     border: 1px solid var(--qp-border) !important;
     border-radius: var(--qp-radius) !important;
     box-shadow: var(--qp-shadow) !important;
@@ -628,16 +626,12 @@ body.qra-theme-system {
     background-color: var(--qp-item-bg) !important;
     background-image: none !important;
 
-    /* 2. Đặt lại kiểu dáng trên iOS: Bỏ đi hiệu ứng bóng "thạch" và khối xám khi chạm mặc định của Apple */
-    -webkit-appearance: none !important;
+    /* 2. Đặt lại kiểu dáng: Bỏ đi hiệu ứng mặc định */
     appearance: none !important;
     -webkit-tap-highlight-color: transparent;
 
-    /* 3. Mở sẵn tăng tốc phần cứng: Để các nút nằm sẵn trong GPU ngay từ đầu,
-       ngăn ngừa việc chuyển từ CPU sang GPU khi di chuột làm mất chi tiết bề mặt */
+    /* 3. Mở sẵn tăng tốc phần cứng */
     transform: translate3d(0, 0, 0);
-    -webkit-transform: translate3d(0, 0, 0);
-    will-change: transform, background-color; /* Báo rõ cho trình duyệt biết ta sẽ thay đổi những thuộc tính này */
 
     /* ---------------------------------------------------- */
 
@@ -649,12 +643,12 @@ body.qra-theme-system {
     box-shadow: none !important;
     text-shadow: none !important;
 
-        /* --- Bắt buộc đồng bộ hóa kiểu phông chữ --- */
-        font-family: inherit !important;     /* Ép thừa kế phông chữ của thẻ body */
-        font-weight: inherit !important;     /* Ép thừa kế độ đậm phông chữ của thẻ body, tránh làm nút bị dày lên */
-        font-size: var(--qp-item-font-size) !important;
+    /* --- Bắt buộc đồng bộ hóa kiểu phông chữ --- */
+    font-family: inherit !important;     /* Ép thừa kế phông chữ của thẻ body */
+    font-weight: inherit !important;     /* Ép thừa kế độ đậm phông chữ của thẻ body, tránh làm nút bị dày lên */
+    font-size: var(--qp-item-font-size) !important;
 
-        display: flex !important;
+    display: flex !important;
     align-items: center !important;
     justify-content: center !important;
 
@@ -687,6 +681,7 @@ body.qra-theme-system {
     pointer-events: none !important;
     text-overflow: ellipsis !important;
     overflow: hidden !important;
+    min-width: 0 !important; /* Vá lỗi Flexbox ngốn diện tích */
     max-width: 100% !important;
     color: inherit !important; /* Bắt buộc thừa kế màu sắc của lớp cha */
     background: none !important; /* Bảo đảm màu nền của văn bản là trong suốt */
@@ -706,9 +701,8 @@ body.qra-theme-system {
     border-color: transparent !important;
     box-shadow: none !important;
 
-    /* Chỉ giữ lại hiệu ứng nổi lên (Dùng translate3d để né lỗi hiển thị trên iOS) */
+    /* Chỉ giữ lại hiệu ứng nổi lên */
     transform: translate3d(0, -2px, 0);
-    -webkit-transform: translate3d(0, -2px, 0);
 
     /* Nghiêm cấm sửa z-index */
     z-index: auto !important;
@@ -724,9 +718,8 @@ body.qra-theme-system {
     border-color: transparent !important;
     box-shadow: none !important;
 
-    /* Phản hồi nhấn vật lý: Thu nhỏ nhẹ (Dùng scale3d để duy trì render bằng GPU) */
+    /* Phản hồi nhấn vật lý: Thu nhỏ nhẹ */
     transform: scale3d(0.96, 0.96, 1) translate3d(0, 0, 0);
-    -webkit-transform: scale3d(0.96, 0.96, 1) translate3d(0, 0, 0);
 
     opacity: 1 !important;
 }
@@ -751,7 +744,7 @@ body.qra-theme-system {
     border-radius: 0 !important;
     margin-bottom: 0 !important;
     /* Dùng lề âm để diệt sạch khe hở kích cỡ điểm ảnh */
-    // margin-top: -1px !important;
+    /* margin-top: -1px !important; */
     border-top: none !important;
     border-bottom: none !important;
     /* Ép đè lên các bóng có thể sinh ra, cản việc nổi lên vệt đen ngang */
@@ -763,7 +756,7 @@ body.qra-theme-system {
     border-top-left-radius: 0 !important;
     border-top-right-radius: 0 !important;
     margin-bottom: 10px !important; /* Khoảng cách rộng giữa các nhóm */
-    // margin-top: -1px !important;    /* Dùng lề âm để vá khe hở với mục phía trên */
+    /* margin-top: -1px !important; */  /* Dùng lề âm để vá khe hở với mục phía trên */
     border-top: none !important;
 }
 
@@ -897,7 +890,7 @@ body.qra-theme-system {
     margin-bottom: 15px;
     justify-content: space-between;
     align-items: center;
-    border: 1px solid var(--grey5050a);;
+    border: 1px solid var(--grey5050a);
     z-index: 1;
 }
 
@@ -1568,30 +1561,26 @@ body.qra-theme-system {
     gap: 10px;
 }
 
-/* Cò bấm Sập/Tung dải rèm cánh Hông */
+/* Cò bấm Sập/Tung dải rèm cánh Hông & Nút Đóng */
+:is(.qr-help-sidebar-toggle, .qr-help-close-btn) {
+    background: transparent;
+    border: none;
+    color: var(--smart-theme-body-color, #fff);
+    cursor: pointer;
+    opacity: 0.7;
+    transition: opacity 0.2s;
+}
+:is(.qr-help-sidebar-toggle, .qr-help-close-btn):hover { opacity: 1; }
+
 .qr-help-sidebar-toggle {
     display: none; /* Chỉ phô diễn hình hài trên thiết bị Cầm Tay */
-    background: transparent;
-    border: none;
-    color: var(--smart-theme-body-color, #fff);
     font-size: 18px;
-    cursor: pointer;
-    opacity: 0.7;
-    transition: opacity 0.2s;
     padding: 4px;
 }
-.qr-help-sidebar-toggle:hover { opacity: 1; }
 
 .qr-help-close-btn {
-    background: transparent;
-    border: none;
-    color: var(--smart-theme-body-color, #fff);
     font-size: 20px;
-    cursor: pointer;
-    opacity: 0.7;
-    transition: opacity 0.2s;
 }
-.qr-help-close-btn:hover { opacity: 1; }
 
 /* Boong chứa Thước Phim vắt ngất ngưởng trên chóp */
 .qr-help-video-container {
