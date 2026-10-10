@@ -2,54 +2,54 @@
 import * as Constants from './constants.js';
 import { Logger, LogCategory } from './logger.js';
 
-// 新版 JSR key
+// Key JSR phiên bản mới
 const JSR_DATA_KEY = "tavern_helper";
 
 /**
- * 获取所有快速回复 (分类为：脚本工具类 vs 标准快速回复)
+ * Lấy tất cả phản hồi nhanh (Phân loại: Công cụ kịch bản vs Phản hồi nhanh tiêu chuẩn)
  */
 export function fetchQuickReplies() {
-    // [DEBUG] 入口日志
-    Logger.info(LogCategory.API, '>>> fetchQuickReplies 开始执行');
+    // [DEBUG] Log đầu vào
+    Logger.info(LogCategory.API, '>>> fetchQuickReplies bắt đầu thực thi');
     
     const stContext = window.SillyTavern?.getContext();
     const finalScriptReplies = []; 
     const finalStandardReplies = []; 
     const processedLabels = new Set();
 
-    // [DEBUG] 检查 QR API 对象状态
+    // [DEBUG] Kiểm tra trạng thái đối tượng QR API
     if (!window.quickReplyApi) {
-        Logger.warn(LogCategory.API, 'window.quickReplyApi 未定义或不存在');
+        Logger.warn(LogCategory.API, 'window.quickReplyApi chưa được định nghĩa hoặc không tồn tại');
     } else {
-        Logger.debug(LogCategory.API, 'window.quickReplyApi 存在', {
+        Logger.debug(LogCategory.API, 'window.quickReplyApi tồn tại', {
             isEnabled: window.quickReplyApi.settings?.isEnabled,
             hasSettings: !!window.quickReplyApi.settings
         });
     }
 
-    // 1. Quick Reply v2 (Standard) -> 归入 Standard
+    // 1. Quick Reply v2 (Tiêu chuẩn) -> Phân loại vào Standard
     if (window.quickReplyApi && window.quickReplyApi.settings?.isEnabled !== false) {
         const qrApi = window.quickReplyApi;
         
         const processQrLevel = (setList, scope) => {
-            // [DEBUG] 检查 SetList
+            // [DEBUG] Kiểm tra SetList
             if (!Array.isArray(setList)) {
-                Logger.debug(LogCategory.API, `[QRV2] scope=${scope}: setList 不是数组或为空`, { setList });
+                Logger.debug(LogCategory.API, `[QRV2] scope=${scope}: setList không phải là mảng hoặc trống`, { setList });
                 return;
             }
             
-            Logger.info(LogCategory.API, `[QRV2] 开始处理 scope=${scope}, 集合数量: ${setList.length}`);
+            Logger.info(LogCategory.API, `[QRV2] Bắt đầu xử lý scope=${scope}, số lượng tập hợp: ${setList.length}`);
 
             setList.forEach((setLink, idx) => {
-                // [DEBUG] 检查每个 SetLink
+                // [DEBUG] Kiểm tra từng SetLink
                 const setName = setLink?.set?.name || "UnknownSet";
                 const isVisible = setLink?.isVisible;
                 const qrCount = setLink?.set?.qrList?.length || 0;
 
-                Logger.debug(LogCategory.API, `[QRV2] 检查集合 #${idx} (${setName})`, {
+                Logger.debug(LogCategory.API, `[QRV2] Kiểm tra tập hợp #${idx} (${setName})`, {
                     isVisible,
                     qrCount,
-                    domExists: !!setLink?.set?.dom, // 关键：检查 DOM 引用是否存在
+                    domExists: !!setLink?.set?.dom, // Quan trọng: Kiểm tra xem tham chiếu DOM có tồn tại không
                     domHTML: setLink?.set?.dom ? setLink.set.dom.outerHTML.substring(0, 50) + '...' : 'null'
                 });
 
@@ -68,11 +68,11 @@ export function fetchQuickReplies() {
                                 });
                                 processedLabels.add(label);
                                 
-                                // [DEBUG] 成功捕获按钮
-                                // Logger.debug(LogCategory.API, `[QRV2] 捕获按钮: [${label}]`);
+                                // [DEBUG] Đã bắt thành công nút
+                                // Logger.debug(LogCategory.API, `[QRV2] Đã bắt nút: [${label}]`);
                             } else {
-                                 // [DEBUG] 按钮被跳过
-                                 // Logger.debug(LogCategory.API, `[QRV2] 跳过按钮: [${qr.label}] (重复或空)`);
+                                 // [DEBUG] Nút bị bỏ qua
+                                 // Logger.debug(LogCategory.API, `[QRV2] Bỏ qua nút: [${qr.label}] (trùng lặp hoặc trống)`);
                             }
                         }
                     });
@@ -84,11 +84,11 @@ export function fetchQuickReplies() {
         processQrLevel(qrApi.settings?.config?.setList, 'global (config)');
     }
 
-    // 2. Tavern Helper / JSR (Modern API Only) -> 归入 Scripts
+    // 2. Tavern Helper / JSR (Chỉ dành cho Modern API) -> Phân loại vào Scripts
     try {
         const newApi = window.TavernHelper?.getAllEnabledScriptButtons;
         if (typeof newApi === 'function') {
-            Logger.debug(LogCategory.API, '开始获取 JSR 脚本按钮');
+            Logger.debug(LogCategory.API, 'Bắt đầu lấy các nút kịch bản JSR');
             const enabledButtonsMap = newApi();
             const scriptNameMap = new Map();
             const globalScriptIds = new Set();
@@ -144,13 +144,13 @@ export function fetchQuickReplies() {
             const charScripts = parseJsrData(charDataRaw)?.scripts;
             if (charScripts) flatten(charScripts).forEach(s => scriptNameMap.set(s.id, s.name));
 
-            // 处理按钮
+            // Xử lý các nút
             for (const script_id in enabledButtonsMap) {
-                // 增加空值检查
+                // Thêm kiểm tra giá trị null/trống
                 if (!Array.isArray(enabledButtonsMap[script_id])) continue;
 
                 enabledButtonsMap[script_id].forEach(btn => {
-                    const label = btn.button_name?.trim(); // 安全访问 trim
+                    const label = btn.button_name?.trim(); // Truy cập an toàn tới trim
                     if (label && !processedLabels.has(label)) {
                         const isGlobal = globalScriptIds.has(script_id);
 
@@ -170,17 +170,17 @@ export function fetchQuickReplies() {
             }
         }
     } catch (e) {
-        Logger.warn(LogCategory.API, '获取 JSR 脚本按钮失败', e);
+        Logger.warn(LogCategory.API, 'Lấy nút kịch bản JSR thất bại', e);
     }
 
-    // 3. LittleWhiteBox (XBTasks Only) -> 归入 Scripts
+    // 3. LittleWhiteBox (Chỉ XBTasks) -> Phân loại vào Scripts
     if (window.XBTasks) {
         try {
             let lwbTasks = null;
 
-            // 1. 优先尝试直接读取 Getter 属性 (新版 LWB)
-            // 原因：window.XBTasks.list() 返回的数据不包含 buttonActivated 字段，会导致无法判断是否显示按钮。
-            // 而 .global / .character 属性返回的是原始引用，包含完整字段。
+            // 1. Ưu tiên thử đọc trực tiếp thuộc tính Getter (LWB phiên bản mới)
+            // Nguyên nhân: Dữ liệu trả về từ window.XBTasks.list() không chứa trường buttonActivated, dẫn đến không thể xác định có hiển thị nút hay không.
+            // Trong khi đó, các thuộc tính .global / .character trả về tham chiếu gốc, chứa đầy đủ các trường.
             if ('global' in window.XBTasks || 'character' in window.XBTasks) {
                 lwbTasks = {
                     global: window.XBTasks.global || [],
@@ -188,10 +188,10 @@ export function fetchQuickReplies() {
                     preset: window.XBTasks.preset || []
                 };
             }
-            // 2. 回退尝试旧版同步接口 dump (仅当它存在且不是 Promise 时使用)
+            // 2. Dự phòng: Thử dùng giao diện đồng bộ cũ dump (chỉ sử dụng khi nó tồn tại và không phải là Promise)
             else if (typeof window.XBTasks.dump === 'function') {
                 const dumpResult = window.XBTasks.dump('all');
-                // 确保不是 Promise (旧版是同步对象，新版是 Promise)
+                // Đảm bảo không phải là Promise (phiên bản cũ là đối tượng đồng bộ, phiên bản mới là Promise)
                 if (dumpResult && typeof dumpResult.then !== 'function') {
                     lwbTasks = dumpResult;
                 }
@@ -201,20 +201,20 @@ export function fetchQuickReplies() {
                 const processLwb = (tasks, scope) => {
                     if (!Array.isArray(tasks)) return;
 
-                    // 获取当前角色名称（仅当 scope 为 character 时需要）
+                    // Lấy tên nhân vật hiện tại (chỉ cần thiết khi scope là character)
                     let charName = "Character";
                     if (scope === 'character' && stContext?.characterId) {
                         charName = stContext.characters[stContext.characterId]?.name || "Character";
                     }
 
                     tasks.forEach(t => {
-                        // 增加 t.buttonActivated 检查，确保只获取配置了"按钮激活"的任务
+                        // Thêm kiểm tra t.buttonActivated, đảm bảo chỉ lấy các tác vụ đã được cấu hình "kích hoạt bằng nút"
                         if (t && !t.disabled && t.name && t.buttonActivated) {
                             const label = t.name.trim();
                             if (label && !processedLabels.has(label)) {
 
-                                // 逻辑修改：如果是角色任务，setName 设为角色名（用于菜单视觉分组）
-                                // 并标记 isLwbCharSet（用于设置界面合并）
+                                // Sửa đổi logic: Nếu là tác vụ của nhân vật, setName được đặt thành tên nhân vật (để nhóm hiển thị trên menu)
+                                // Đồng thời đánh dấu isLwbCharSet (để gộp giao diện cài đặt)
                                 const isCharSet = scope === 'character';
                                 const finalSetName = isCharSet ? charName : `LWB-${scope}-${t.name}`;
 
@@ -226,8 +226,8 @@ export function fetchQuickReplies() {
                                     source: 'LittleWhiteBox',
                                     taskId: t.name,
                                     taskScope: scope,
-                                    scope: scope, // 保持统一命名
-                                    isLwbCharSet: isCharSet // 新增标记
+                                    scope: scope, // Giữ cách đặt tên thống nhất
+                                    isLwbCharSet: isCharSet // Đánh dấu mới thêm
                                 });
                                 processedLabels.add(label);
                             }
@@ -239,11 +239,11 @@ export function fetchQuickReplies() {
                 processLwb(lwbTasks.preset, 'preset');
             }
         } catch (e) {
-            Logger.error(LogCategory.API, '获取 LWB 任务失败', e);
+            Logger.error(LogCategory.API, 'Lấy tác vụ LWB thất bại', e);
         }
     }
 
-    // 4. 第三方插件按钮 (内置预设 + 开放API)
+    // 4. Nút của Plugin bên thứ ba (Preset tích hợp + API mở)
     const thirdPartyRegistry = getThirdPartyRegistry();
 
     thirdPartyRegistry.forEach(config => {
@@ -253,13 +253,13 @@ export function fetchQuickReplies() {
             label = label.trim();
             if (!label) label = "Ext Button";
 
-            // 智能识别纯 FontAwesome 图标类名，并自动转换为 HTML 标签
+            // Nhận diện thông minh các tên class icon thuần FontAwesome và tự động chuyển đổi thành thẻ HTML
             if (/^(fa|fas|far|fab|fa-solid|fa-regular|fa-brands)\s+fa-[\w-]+$/.test(label)) {
                 label = `<i class="${label}"></i>`;
             }
 
             finalScriptReplies.push({
-                setName: config.group_name || '酒馆插件',
+                setName: config.group_name || 'Plugin Tavern',
                 label: label,
                 isStandard: false,
                 source: 'RawDomElement',
@@ -270,7 +270,7 @@ export function fetchQuickReplies() {
     });
 
     const result = { scripts: finalScriptReplies, standard: finalStandardReplies };
-    Logger.info(LogCategory.API, '<<< fetchQuickReplies 执行结束', {
+    Logger.info(LogCategory.API, '<<< fetchQuickReplies kết thúc thực thi', {
         scriptsCount: result.scripts.length,
         standardCount: result.standard.length,
         total: result.scripts.length + result.standard.length
@@ -282,12 +282,12 @@ export function getThirdPartyRegistry() {
     const registry = [
         {
             dom_id: 'pt-wb-common-button',
-            group_name: '预设转移工具',
-            button_name: '世界书常用'
+            group_name: 'Công cụ Chuyển đổi Preset',
+            button_name: 'Sách Thế giới (Worldbook) Thường dùng'
         },
         {
             dom_id: 'zero-preset-btn',
-            group_name: '预设管理',
+            group_name: 'Quản lý Preset',
             button_name: 'fa-solid fa-camera'
         }
     ];
@@ -318,8 +318,8 @@ export function triggerRawDom(domId) {
     const el = document.getElementById(domId);
     if (el) {
         el.click();
-        Logger.debug(LogCategory.API, `触发 DOM 元素点击`, { domId });
+        Logger.debug(LogCategory.API, `Kích hoạt nhấp chuột vào phần tử DOM`, { domId });
     } else {
-        Logger.warn(LogCategory.API, `DOM 元素未找到`, { domId });
+        Logger.warn(LogCategory.API, `Không tìm thấy phần tử DOM`, { domId });
     }
 }

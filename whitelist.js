@@ -3,26 +3,26 @@ import * as Constants from './constants.js';
 import { fetchQuickReplies, getThirdPartyRegistry } from './api.js';
 import { Logger, LogCategory } from './logger.js';
 
-// 检查某个 ID 是否在白名单中 (合并用户定义 + 内置)
+// Kiểm tra xem một ID có nằm trong danh sách trắng không (Gộp người dùng định nghĩa + tích hợp)
 function checkIsWhitelisted(id, userWhitelist) {
     if (!id) return false;
-    // 1. 检查内置白名单
+    // 1. Kiểm tra danh sách trắng tích hợp
     if (Constants.BUILTIN_WHITELIST.includes(id)) return true;
-    // 2. 检查用户白名单
+    // 2. Kiểm tra danh sách trắng của người dùng
     return userWhitelist.includes(id);
 }
 
-// 核心处理函数
+// Hàm xử lý cốt lõi
 function processElement(element, userWhitelist, qrApi) {
     if (!element || !element.classList) return;
 
     let idToCheck = null;
     let detectionType = 'Unknown';
     
-    // [DEBUG] 打印正在处理的每一个相关 DOM 元素的基础信息
-    // 仅过滤掉完全无关的 div，保留看似是容器的元素
+    // [DEBUG] In thông tin cơ bản của từng phần tử DOM liên quan đang được xử lý
+    // Chỉ lọc bỏ các div hoàn toàn không liên quan, giữ lại các phần tử có vẻ là container (bộ chứa)
     if (element.classList.contains('qr--buttons') || element.id.startsWith('script_container_')) {
-        Logger.debug(LogCategory.WHITELIST, `[ProcessElement] 正在检查 DOM 元素`, {
+        Logger.debug(LogCategory.WHITELIST, `[ProcessElement] Đang kiểm tra phần tử DOM`, {
             tagName: element.tagName,
             id: element.id,
             className: element.className,
@@ -30,18 +30,18 @@ function processElement(element, userWhitelist, qrApi) {
         });
     }
 
-    // 1. 识别 Input Helper / Custom Buttons
+    // 1. Nhận diện Input Helper / Custom Buttons
     if (element.id && Constants.BUILTIN_WHITELIST.includes(element.id)) {
         idToCheck = element.id;
         detectionType = 'Builtin_ID';
     }
-    // 2. 识别 JSR 容器
+    // 2. Nhận diện container JSR
     else if (element.id && element.id.startsWith('script_container_')) {
         const scriptId = element.id.substring('script_container_'.length);
         idToCheck = `JSR::${scriptId}`;
         detectionType = 'JSR_Container';
     }
-    // 3. 识别 QR v2 Set 容器
+    // 3. Nhận diện container Set của QR v2
     else if (element.classList.contains('qr--buttons')) {
         const sets = getAllQrSets(qrApi);
         const setData = sets.get(element);
@@ -50,13 +50,13 @@ function processElement(element, userWhitelist, qrApi) {
             idToCheck = `QRV2::${setData.name}`;
             detectionType = 'QRV2_Set';
         } else {
-            // [CRITICAL DEBUG] 如果是 qr--buttons 但无法从 sets 中获取，说明引用不匹配！
-            // 这里开始进行 iOS 引用失效排查
-            Logger.warn(LogCategory.WHITELIST, `[ProcessElement] 发现孤立的 qr--buttons，无法匹配到 API 数据!`, {
+            // [CRITICAL DEBUG] Nếu là qr--buttons nhưng không lấy được từ sets, nghĩa là tham chiếu không khớp!
+            // Bắt đầu khắc phục sự cố mất tham chiếu trên iOS tại đây
+            Logger.warn(LogCategory.WHITELIST, `[ProcessElement] Phát hiện qr--buttons mồ côi, không thể khớp với dữ liệu API!`, {
                 elementOuterHTML: element.outerHTML.substring(0, 100)
             });
 
-            // 深度比对：遍历 Map 中的所有 Key，检查是否"长得一样"但"引用不同"
+            // So sánh sâu: Duyệt qua tất cả các Key trong Map, kiểm tra xem có "trông giống nhau" nhưng "tham chiếu khác nhau" không
             let matchFoundByStructure = false;
             sets.forEach((val, keyDom) => {
                 const isRefEqual = (keyDom === element);
@@ -64,28 +64,28 @@ function processElement(element, userWhitelist, qrApi) {
                 const isOuterHtmlEqual = keyDom.outerHTML === element.outerHTML;
 
                 if (isEqualNode || isOuterHtmlEqual) {
-                    Logger.error(LogCategory.WHITELIST, `[引用失效确认] 找到结构相同的 DOM，但引用不相等!`, {
+                    Logger.error(LogCategory.WHITELIST, `[Xác nhận mất tham chiếu] Tìm thấy DOM có cấu trúc giống hệt, nhưng tham chiếu không bằng nhau!`, {
                         setName: val.name,
-                        refEqual: isRefEqual,     // 预期为 false
-                        nodeEqual: isEqualNode,   // 预期为 true
-                        htmlEqual: isOuterHtmlEqual // 预期为 true
+                        refEqual: isRefEqual,     // Kỳ vọng là false
+                        nodeEqual: isEqualNode,   // Kỳ vọng là true
+                        htmlEqual: isOuterHtmlEqual // Kỳ vọng là true
                     });
                     matchFoundByStructure = true;
                 }
             });
 
             if (!matchFoundByStructure) {
-                Logger.warn(LogCategory.WHITELIST, `[ProcessElement] 该 qr--buttons 在 API 缓存中完全不存在对应的结构`);
+                Logger.warn(LogCategory.WHITELIST, `[ProcessElement] qr--buttons này hoàn toàn không có cấu trúc tương ứng trong cache API`);
             }
         }
     }
 
-    // 核心日志与处理
+    // Ghi log và xử lý cốt lõi
     if (idToCheck) {
         const isWhitelisted = checkIsWhitelisted(idToCheck, userWhitelist);
         const action = isWhitelisted ? 'SHOW (Whitelist)' : 'HIDE';
 
-        Logger.info(LogCategory.CORE, `匹配成功: ${detectionType} -> ${idToCheck}`, {
+        Logger.info(LogCategory.CORE, `Khớp thành công: ${detectionType} -> ${idToCheck}`, {
             whitelisted: isWhitelisted,
             action: action
         });
@@ -100,7 +100,7 @@ function processElement(element, userWhitelist, qrApi) {
     }
 }
 
-// 缓存 QR Sets 映射 (复用原逻辑但简化)
+// Cache ánh xạ các QR Sets (Tái sử dụng logic cũ nhưng đơn giản hóa)
 let allQrSetsCache = new Map();
 function getAllQrSets(qrApi) {
     allQrSetsCache.clear();
@@ -112,8 +112,8 @@ function getAllQrSets(qrApi) {
             if (link?.set?.dom && link.set.name) {
                 allQrSetsCache.set(link.set.dom, { name: link.set.name, source });
                 totalFound++;
-                // [DEBUG] 记录缓存的 DOM 特征
-                Logger.debug(LogCategory.WHITELIST, `[MapCache] 存入集合: ${link.set.name}`, {
+                // [DEBUG] Ghi nhận đặc điểm DOM được lưu trữ trong cache
+                Logger.debug(LogCategory.WHITELIST, `[MapCache] Lưu vào tập hợp: ${link.set.name}`, {
                     source,
                     domId: link.set.dom.id,
                     domClass: link.set.dom.className,
@@ -127,24 +127,24 @@ function getAllQrSets(qrApi) {
     collect(qrApi?.settings?.chatConfig?.setList, 'chatConfig');
     collect(qrApi?.settings?.charConfig?.setList, 'charConfig');
     
-    Logger.info(LogCategory.WHITELIST, `[getAllQrSets] 缓存构建完成，共 ${totalFound} 个集合`);
+    Logger.info(LogCategory.WHITELIST, `[getAllQrSets] Xây dựng cache hoàn tất, tổng cộng ${totalFound} tập hợp`);
     return allQrSetsCache;
 }
 
 export function applyWhitelistDOMChanges() {
     const qrBar = document.getElementById('qr--bar');
     if (!qrBar) {
-        Logger.warn(LogCategory.WHITELIST, '未找到 #qr--bar 元素，停止 DOM 更新');
+        Logger.warn(LogCategory.WHITELIST, 'Không tìm thấy phần tử #qr--bar, dừng cập nhật DOM');
         return;
     }
     
     const settings = window.SillyTavern?.getContext()?.extensionSettings?.[Constants.EXTENSION_NAME];
     if (!settings) return;
     
-    Logger.info(LogCategory.CORE, '=== 开始执行白名单 DOM 更新 ===');
+    Logger.info(LogCategory.CORE, '=== Bắt đầu thực thi cập nhật DOM danh sách trắng ===');
     
-    // [DEBUG] 打印当前 qr--bar 的子元素概览，确认容器是否存在
-    Logger.debug(LogCategory.WHITELIST, `[QR-BAR Snapshot] 子元素数量: ${qrBar.children.length}`, {
+    // [DEBUG] In tổng quan các phần tử con hiện tại của qr--bar, xác nhận xem container có tồn tại không
+    Logger.debug(LogCategory.WHITELIST, `[Ảnh chụp QR-BAR] Số lượng phần tử con: ${qrBar.children.length}`, {
         children: Array.from(qrBar.children).map(c => `${c.tagName}#${c.id}.${c.className}`)
     });
 
@@ -152,7 +152,7 @@ export function applyWhitelistDOMChanges() {
     const pluginEnabled = settings?.enabled !== false;
     const qrApi = window.quickReplyApi;
 
-    // 清理旧状态
+    // Dọn dẹp trạng thái cũ
     const elementsToReset = qrBar.querySelectorAll('.qrq-whitelisted-original, .qrq-hidden-by-plugin, .qrq-wrapper-visible, .qrq-mixed-content');
     elementsToReset.forEach(el => el.classList.remove('qrq-whitelisted-original', 'qrq-hidden-by-plugin', 'qrq-wrapper-visible', 'qrq-mixed-content'));
 
@@ -163,7 +163,7 @@ export function applyWhitelistDOMChanges() {
     }
     document.body.classList.add('qra-enabled');
 
-    // --- 第三方特殊按钮预处理 (动态注册表机制) ---
+    // --- Tiền xử lý nút đặc biệt của bên thứ ba (Cơ chế Registry động) ---
     const thirdPartyRegistry = getThirdPartyRegistry();
 
     thirdPartyRegistry.forEach(ext => {
@@ -191,9 +191,9 @@ export function applyWhitelistDOMChanges() {
         });
     });
 
-    // --- LWB 按钮特殊处理 (因为它们没有容器，是单个按钮) ---
+    // --- Xử lý đặc biệt cho nút LWB (Vì chúng không có container mà là các nút đơn lẻ) ---
     if (window.XBTasks) {
-        // 获取当前角色的所有任务名，用于比对
+        // Lấy tất cả tên nhiệm vụ của nhân vật hiện tại, dùng để so sánh
         let charTasksNames = new Set();
         if (window.XBTasks.character && Array.isArray(window.XBTasks.character)) {
             window.XBTasks.character.forEach(t => charTasksNames.add(t.name));
@@ -210,7 +210,7 @@ export function applyWhitelistDOMChanges() {
                 isWhite = userWhitelist.some(wid => wid.endsWith(`::${taskName}`) && wid.startsWith('LWB::'));
             }
 
-            Logger.info(LogCategory.CORE, `检测 LWB 按钮: ${taskName}`, {
+            Logger.info(LogCategory.CORE, `Đang phát hiện nút LWB: ${taskName}`, {
                 scope: charTasksNames.has(taskName) ? 'Character' : 'Global/Preset',
                 isWhitelisted: isWhite
             });
@@ -223,20 +223,20 @@ export function applyWhitelistDOMChanges() {
         });
     }
 
-    // --- LWB 按钮去重处理 (修复非合并模式下的双重显示) ---
-    // 原因：LWB 可能会在多个容器(如 QR Bar 和 JSR Script Container)中同时注入相同的按钮。
-    // 如果这些容器都被判定为 "Mixed Content"，会导致按钮重复出现。
+    // --- Xử lý chống trùng lặp cho nút LWB (Sửa lỗi hiển thị kép ở chế độ không gộp) ---
+    // Nguyên nhân: LWB có thể tiêm các nút giống hệt nhau vào nhiều container cùng lúc (như QR Bar và JSR Script Container).
+    // Nếu tất cả các container này đều bị đánh giá là "Mixed Content", sẽ dẫn đến nút xuất hiện trùng lặp.
     if (window.XBTasks) {
         const seenTasks = new Set();
-        // 再次查询所有刚才被标记为白名单的 LWB 按钮
+        // Tìm lại tất cả các nút LWB vừa được đánh dấu nằm trong danh sách trắng
         const whiteLwbButtons = qrBar.querySelectorAll('.xiaobaix-task-button.qrq-whitelisted-original');
 
         whiteLwbButtons.forEach(btn => {
             const name = btn.dataset.taskName;
             if (name) {
                 if (seenTasks.has(name)) {
-                    // 如果这个任务名已经出现过（即重复项），强制移除白名单标记并隐藏
-                    // 这样它所在的容器就不会因为这个按钮而被误判为 Mixed Content
+                    // Nếu tên nhiệm vụ này đã xuất hiện trước đó (tức là trùng lặp), buộc gỡ bỏ dấu hiệu danh sách trắng và ẩn đi
+                    // Như vậy container chứa nó sẽ không bị phán đoán nhầm là Mixed Content do nút này
                     btn.classList.remove('qrq-whitelisted-original');
                     btn.classList.add('qrq-hidden-by-plugin');
                 } else {
@@ -246,11 +246,11 @@ export function applyWhitelistDOMChanges() {
         });
     }
 
-    // --- 容器处理 (支持 ST 合并模式 Wrapper) ---
-    // 查找是否包裹在 wrapper 中
+    // --- Xử lý container (Hỗ trợ chế độ gộp Wrapper của ST) ---
+    // Kiểm tra xem có được bọc trong wrapper không
     let wrapper = null;
     for (const child of qrBar.children) {
-        // Wrapper 特征：没有ID，包含 qr--buttons 子元素
+        // Dấu hiệu nhận biết Wrapper: Không có ID, chứa phần tử con qr--buttons
         if (!child.id && child.querySelector('.qr--buttons')) {
             wrapper = child;
             break;
@@ -261,46 +261,46 @@ export function applyWhitelistDOMChanges() {
         elements.forEach(el => processElement(el, userWhitelist, qrApi));
     };
 
-    // --- 核心逻辑优化：处理所有容器 (包括 Wrapper 内部和外部) ---
-    // 1. 首先运行基础显隐逻辑 (这会标记 qrq-hidden-by-plugin 或 qrq-whitelisted-original)
+    // --- Tối ưu hóa logic cốt lõi: Xử lý tất cả các container (Bao gồm bên trong và ngoài Wrapper) ---
+    // 1. Trước tiên chạy logic ẩn/hiện cơ bản (Sẽ đánh dấu qrq-hidden-by-plugin hoặc qrq-whitelisted-original)
     const allContainers = qrBar.querySelectorAll('.qr--buttons, [id^="script_container_"]');
     processList(allContainers);
 
-    // 2. 二次检查：处理"混合状态"
-    // 在非合并模式下，LWB 按钮会被注入到 .qr--buttons 内部。
-    // 如果 .qr--buttons 被上面的 processList 标记为隐藏，但内部有 LWB 白名单按钮，
-    // 我们必须强制显示该容器，并标记为 mixed (CSS 会处理内部非白名单子元素的隐藏)。
+    // 2. Kiểm tra lần 2: Xử lý "trạng thái hỗn hợp" (Mixed state)
+    // Ở chế độ không gộp, các nút LWB sẽ được tiêm vào bên trong .qr--buttons.
+    // Nếu .qr--buttons bị hàm processList ở trên đánh dấu là bị ẩn, nhưng bên trong nó có các nút LWB nằm trong danh sách trắng,
+    // chúng ta phải buộc hiển thị container đó, và đánh dấu là mixed (CSS sẽ xử lý việc ẩn các phần tử con thông thường không thuộc danh sách trắng bên trong).
     allContainers.forEach(container => {
-        // 优化：如果容器是 JSR 脚本容器 (id^="script_container_") 且自身未被白名单，
-        // 即使它里面混入了 LWB 按钮，我们通常也不应该将其作为混合容器显示。
-        // 因为 LWB 按钮通常也会存在于主 QR 容器中（已被上面的去重逻辑保留）。
-        // 强行显示 JSR 容器可能会导致布局混乱或重复。
+        // Tối ưu hóa: Nếu container là một script container JSR (id^="script_container_") và bản thân nó không nằm trong danh sách trắng,
+        // ngay cả khi có các nút LWB lẫn vào bên trong nó, chúng ta thông thường cũng không nên hiển thị nó dưới dạng container hỗn hợp.
+        // Vì các nút LWB thường cũng sẽ tồn tại trong container QR chính (đã được giữ lại bởi logic chống trùng lặp ở trên).
+        // Cố tình hiển thị JSR container có thể gây rối loạn bố cục hoặc lặp lại.
         const isJsrContainer = container.id && container.id.startsWith('script_container_');
         const isSelfWhitelisted = container.classList.contains('qrq-whitelisted-original');
 
         if (isJsrContainer && !isSelfWhitelisted) {
-            return; // 跳过 JSR 容器的混合检测
+            return; // Bỏ qua việc phát hiện hỗn hợp cho JSR container
         }
 
-        // 检查是否有子元素被标记为白名单显示
+        // Kiểm tra xem có phần tử con nào được đánh dấu hiển thị theo danh sách trắng không
         const hasVisibleChild = container.querySelector('.qrq-whitelisted-original');
 
         if (hasVisibleChild) {
-            // 如果容器本身被隐藏了，或者它需要作为混合容器显示
+            // Nếu bản thân container đã bị ẩn, hoặc nó cần hiển thị dưới dạng container hỗn hợp
             if (container.classList.contains('qrq-hidden-by-plugin')) {
                 container.classList.remove('qrq-hidden-by-plugin');
                 container.classList.add('qrq-mixed-content');
             } else if (!isSelfWhitelisted) {
-                // 容器本身没被白名单选中（正常显示），但也可能处于混合状态
-                // 这种情况下添加 mixed 类可以确保 CSS 隐藏掉不需要的普通子元素
+                // Bản thân container không được chọn vào danh sách trắng (hiển thị bình thường), nhưng cũng có thể đang ở trạng thái hỗn hợp
+                // Trong trường hợp này, thêm lớp mixed có thể đảm bảo CSS ẩn đi những phần tử con thông thường không cần thiết
                 container.classList.add('qrq-mixed-content');
             }
         }
     });
 
-    // --- Wrapper 特殊处理 (保持原有的 ST 合并模式逻辑) ---
+    // --- Xử lý đặc biệt cho Wrapper (Giữ nguyên logic của chế độ gộp ST) ---
     if (wrapper) {
-        // 检查 Wrapper 内部是否有可见内容 (白名单原子元素、内置元素、或混合容器)
+        // Kiểm tra xem bên trong Wrapper có nội dung hiển thị nào không (Phần tử con trong danh sách trắng, phần tử tích hợp sẵn, hoặc container hỗn hợp)
         const hasWhitelistedInner = wrapper.querySelector('.qrq-whitelisted-original');
         const hasBuiltIn = Constants.BUILTIN_WHITELIST.some(id => wrapper.querySelector(`#${id}`));
         const hasMixed = wrapper.querySelector('.qrq-mixed-content');
@@ -312,14 +312,14 @@ export function applyWhitelistDOMChanges() {
         }
     }
 
-    // 过滤菜单项显示 (如果已在白名单显示，则从菜单中移除)
+    // Lọc hiển thị của các mục trong menu (Nếu đã hiển thị trên thanh do nằm trong danh sách trắng, thì xóa khỏi menu)
     filterMenuItems(userWhitelist);
 
-    Logger.debug(LogCategory.WHITELIST, '白名单 DOM 变更应用完成');
+    Logger.debug(LogCategory.WHITELIST, 'Việc áp dụng thay đổi DOM cho danh sách trắng đã hoàn tất');
 }
 
 function filterMenuItems(whitelist) {
-    // 隐藏菜单中那些已经在白名单里的项目
+    // Ẩn các mục trên menu mà đã nằm trong danh sách trắng
     const items = document.querySelectorAll(`.${Constants.CLASS_ACTION_ITEM}`);
     items.forEach(btn => {
         let id = '';
@@ -327,7 +327,7 @@ function filterMenuItems(whitelist) {
         if (source === 'JSSlashRunner') id = `JSR::${btn.dataset.scriptId}`;
         else if (source === 'QuickReplyV2') id = `QRV2::${btn.dataset.setName}`;
         else if (source === 'LittleWhiteBox') {
-            // 特殊处理 LWB 角色任务
+            // Xử lý đặc biệt cho nhiệm vụ LWB của nhân vật
             if (btn.dataset.taskScope === 'character') {
                 id = 'LWB::Character_Set';
             } else {
@@ -336,10 +336,10 @@ function filterMenuItems(whitelist) {
         }
         else if (source === 'RawDomElement') id = btn.dataset.domId;
 
-        // 同时检查用户白名单和内置白名单
-        // CSS 中 .action-item 设置了 display: flex !important
-        // 因此普通的 btn.style.display = 'none' 无法生效
-        // 必须使用 setProperty 加上 'important' 优先级
+        // Đồng thời kiểm tra danh sách trắng người dùng và danh sách trắng tích hợp
+        // Trong CSS, .action-item được gán display: flex !important
+        // Do đó, dùng btn.style.display = 'none' thông thường sẽ không có tác dụng
+        // Phải sử dụng setProperty kèm theo độ ưu tiên 'important'
         if (id && checkIsWhitelisted(id, whitelist)) {
             btn.style.setProperty('display', 'none', 'important');
         } else {
@@ -348,7 +348,7 @@ function filterMenuItems(whitelist) {
     });
 }
 
-// 简单的防抖观察者
+// Bộ quan sát debouce (chống rung) đơn giản
 let debounceTimer = null;
 export function observeBarMutations() {
     const target = document.getElementById('send_form') || document.body;
@@ -357,9 +357,9 @@ export function observeBarMutations() {
         debounceTimer = setTimeout(() => {
             applyWhitelistDOMChanges();
 
-            // 修复：当按钮栏发生变动（如JSR脚本启用/禁用）时，实时刷新设置面板中的白名单列表
+            // Sửa lỗi: Khi thanh nút thay đổi (ví dụ: bật/tắt script JSR), làm mới ngay lập tức danh sách trắng trong bảng cài đặt
             if (window.quickReplyMenu && typeof window.quickReplyMenu.populateWhitelistManagementUI === 'function') {
-                // 仅在列表容器存在于DOM中时执行（即设置面板已加载）
+                // Chỉ thực thi khi bộ chứa danh sách hiện diện trong DOM (tức là bảng cài đặt đã được tải)
                 if (document.getElementById('qrq-non-whitelisted-list')) {
                     window.quickReplyMenu.populateWhitelistManagementUI();
                 }

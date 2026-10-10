@@ -1,4 +1,4 @@
-// index.js - Main Entry Point
+// index.js - Điểm khởi đầu chính (Main Entry Point)
 import * as Constants from './constants.js';
 import { sharedState } from './state.js';
 import { createMenuElement } from './ui.js';
@@ -9,10 +9,10 @@ import { Logger, LogCategory } from './logger.js';
 import { getCurrentLocale, addLocaleData, translate, applyLocale } from '../../../i18n.js';
 import { dictionaries } from './dict.js';
 
-// 定义默认设置结构
+// Định nghĩa cấu trúc cài đặt mặc định
 const DEFAULT_SETTINGS = {
     enabled: true,
-    firstTimeSetupPending: true, // 标记是否需要显示首次设置栏
+    firstTimeSetupPending: true, // Đánh dấu xem có cần hiển thị thanh thiết lập lần đầu không
     iconType: Constants.ICON_TYPES.STAR,
     customIconUrl: '',
     faIconCode: '',
@@ -21,18 +21,18 @@ const DEFAULT_SETTINGS = {
     autoShrinkEnabled: false,
     uiTheme: Constants.UI_THEMES.LIGHT,
     enableBackdrop: false,
-    migrated_from_v1: false, // 迁移状态标记
-    hideWhitelistHelp: false, // 是否隐藏白名单页面的帮助说明
-    logLevel: 1, // 新增：默认日志级别 (1=INFO)
-    builtinIconSize: 'match', // 内置图标大小：'match' = 与发送按钮保持一致, 或自定义数值 (em 单位)
-    enableCustomSort: false, // 是否启用自定义排序模式
-    groupOrder: { left: [], right: [] }, // 排序蓝图
-    enableAvatarRotation: false, // 控制头像是否在打开弹窗时旋转
+    migrated_from_v1: false, // Đánh dấu trạng thái chuyển đổi (migration)
+    hideWhitelistHelp: false, // Có ẩn hướng dẫn trên trang danh sách trắng hay không
+    logLevel: 1, // Mới thêm: Cấp độ log mặc định (1=INFO)
+    builtinIconSize: 'match', // Kích thước biểu tượng tích hợp: 'match' = khớp với nút gửi, hoặc giá trị tùy chỉnh (đơn vị em)
+    enableCustomSort: false, // Có bật chế độ sắp xếp tùy chỉnh hay không
+    groupOrder: { left: [], right: [] }, // Bản thiết kế sắp xếp (Blueprint)
+    enableAvatarRotation: false, // Điều khiển xem ảnh đại diện có xoay khi mở popup hay không
 };
 
-// --- 移除顶层的设置初始化逻辑 ---
-// 原来的代码在这里执行了 extension_settings 的初始化，导致了竞态条件。
-// 我们将它移到 initializePlugin 函数中。
+// --- Xóa logic khởi tạo cài đặt ở cấp độ cao nhất ---
+// Mã cũ thực thi khởi tạo extension_settings ở đây, dẫn đến điều kiện chạy đua (race condition).
+// Chúng tôi chuyển nó vào hàm initializePlugin.
 
 function injectRocketButton() {
     const sendButton = document.getElementById('send_but');
@@ -43,17 +43,17 @@ function injectRocketButton() {
 
     rocketButton = document.createElement('div');
     rocketButton.id = Constants.ID_ROCKET_BUTTON;
-    rocketButton.title = translate("快速回复菜单", 'qra_rocket_btn_title');
+    rocketButton.title = translate("Menu Phản hồi nhanh", 'qra_rocket_btn_title');
     sendButton.parentNode.insertBefore(rocketButton, sendButton);
     return rocketButton;
 }
 
-// 专门用于初始化/合并设置的函数
+// Hàm chuyên dụng để khởi tạo/hợp nhất cài đặt
 function ensureSettingsInitialized() {
     const context = window.SillyTavern.getContext();
-    const OLD_DATA_KEY = "quick-reply-menu"; // 旧版本的数据键名
+    const OLD_DATA_KEY = "quick-reply-menu"; // Khóa dữ liệu của phiên bản cũ
 
-    // 1. 确保新版命名空间在内存中存在
+    // 1. Đảm bảo không gian tên (namespace) phiên bản mới tồn tại trong bộ nhớ
     if (!context.extensionSettings[Constants.EXTENSION_NAME]) {
         context.extensionSettings[Constants.EXTENSION_NAME] = {};
     }
@@ -61,40 +61,40 @@ function ensureSettingsInitialized() {
     const currentSettings = context.extensionSettings[Constants.EXTENSION_NAME];
     const oldSettings = context.extensionSettings[OLD_DATA_KEY];
 
-    // 2. 核心迁移逻辑：仅在未迁移过且检测到旧数据时执行
+    // 2. Logic chuyển đổi cốt lõi: Chỉ thực thi khi chưa chuyển đổi và phát hiện có dữ liệu cũ
     if (!currentSettings.migrated_from_v1) {
-        Logger.info(LogCategory.SYSTEM, '正在初始化新环境并检测旧版本数据...');
+        Logger.info(LogCategory.SYSTEM, 'Đang khởi tạo môi trường mới và phát hiện dữ liệu phiên bản cũ...');
 
         if (oldSettings) {
-            Logger.info(LogCategory.SYSTEM, '检测到旧版数据，开始跨键名静默克隆...');
+            Logger.info(LogCategory.SYSTEM, 'Đã phát hiện dữ liệu bản cũ, bắt đầu nhân bản ẩn qua các khóa...');
 
-            // A. 状态迁移：enabled 与 autoShrinkEnabled
+            // A. Chuyển đổi trạng thái: enabled và autoShrinkEnabled
             currentSettings.enabled = oldSettings.enabled !== false;
             currentSettings.autoShrinkEnabled = oldSettings.autoShrinkEnabled === true;
 
-            // B. 白名单迁移：直接克隆数组 (ID 格式已在 api.js 中对齐)
+            // B. Chuyển đổi Danh sách trắng: Nhân bản trực tiếp mảng (Định dạng ID đã được căn chỉnh trong api.js)
             if (Array.isArray(oldSettings.whitelist)) {
                 currentSettings.whitelist = [...oldSettings.whitelist];
             }
 
-            // 如果是从旧版 V1 迁移过来的用户，视为老用户，默认跳过首次设置向导
-            // 如果您希望老用户更新后也看一次，请注释掉下面这行
+            // Nếu là người dùng chuyển từ V1 cũ sang, coi như người dùng cũ, mặc định bỏ qua hướng dẫn thiết lập lần đầu
+            // Nếu bạn muốn người dùng cũ sau khi cập nhật cũng xem qua một lần, hãy ghi chú dòng dưới đây
             // currentSettings.firstTimeSetupPending = false;
 
-            // C. 图标库清洗：去除废弃的 id 和 size 字段
+            // C. Dọn dẹp thư viện biểu tượng: Xóa các trường id và size không còn sử dụng
             if (Array.isArray(oldSettings.savedCustomIcons)) {
                 currentSettings.savedCustomIcons = oldSettings.savedCustomIcons
                     .map(icon => ({
-                        name: icon.name || "未命名图标",
+                        name: icon.name || "Biểu tượng chưa đặt tên",
                         url: icon.url || ""
                     }))
-                    .filter(icon => icon.url); // 过滤掉无效数据
+                    .filter(icon => icon.url); // Lọc bỏ dữ liệu không hợp lệ
             }
 
-            // D. 激活图标迁移
+            // D. Chuyển đổi biểu tượng đang kích hoạt
             currentSettings.customIconUrl = oldSettings.customIconUrl || '';
 
-            // 如果旧版是 fontawesome 类型，由于新版不支持，强制回退至默认星月
+            // Nếu bản cũ là loại fontawesome, do bản mới không hỗ trợ, buộc quay về mặc định là sao trăng
             if (oldSettings.iconType === 'fontawesome') {
                 currentSettings.iconType = Constants.ICON_TYPES.STAR;
             } else {
@@ -102,17 +102,17 @@ function ensureSettingsInitialized() {
             }
         }
 
-        // 无论是否检测到旧数据，都标记为已迁移，防止后续重复逻辑
+        // Bất kể có phát hiện dữ liệu cũ hay không, đều đánh dấu là đã chuyển đổi, tránh lặp lại logic sau này
         currentSettings.migrated_from_v1 = true;
 
-        // 3. 强制持久化：将内存中克隆的数据立即写入硬盘 settings.json
+        // 3. Bền bỉ hóa (Persist) cưỡng chế: Ghi ngay lập tức dữ liệu đã nhân bản trong bộ nhớ vào ổ cứng settings.json
         if (typeof context.saveSettingsDebounced === 'function') {
             context.saveSettingsDebounced();
-            Logger.info(LogCategory.SYSTEM, '迁移数据已成功锁定并写入磁盘');
+            Logger.info(LogCategory.SYSTEM, 'Dữ liệu chuyển đổi đã được khóa và ghi vào ổ đĩa thành công');
         }
     }
 
-    // 4. 补全默认设置键值
+    // 4. Tự động điền các khóa cài đặt mặc định còn thiếu
     Object.keys(DEFAULT_SETTINGS).forEach(key => {
         if (currentSettings[key] === undefined) {
             currentSettings[key] = DEFAULT_SETTINGS[key];
@@ -122,19 +122,19 @@ function ensureSettingsInitialized() {
 
 function initializePlugin() {
     try {
-        Logger.info(LogCategory.SYSTEM, '插件正在初始化...');
+        Logger.info(LogCategory.SYSTEM, 'Tiện ích đang khởi tạo...');
 
-        // --- 注入 i18n 字典 ---
+        // --- Chèn từ điển i18n ---
         const currentLang = getCurrentLocale();
         const dictToLoad = dictionaries[currentLang];
         if (dictToLoad) {
             addLocaleData(currentLang, dictToLoad);
-            applyLocale(); // addLocaleData 在 applyLocale 之后调用，需要手动重新扫描 DOM
+            applyLocale(); // addLocaleData được gọi sau applyLocale, cần quét lại DOM thủ công
         }
         // ----------------------
 
-        // --- 在这里调用设置初始化 ---
-        // 此时 APP_READY 已触发，window.extension_settings 肯定已经包含了从硬盘读取的数据
+        // --- Gọi khởi tạo cài đặt ở đây ---
+        // Tại thời điểm này APP_READY đã kích hoạt, window.extension_settings chắc chắn đã chứa dữ liệu đọc từ ổ cứng
         ensureSettingsInitialized();
 
         const rocketButton = injectRocketButton();
@@ -145,7 +145,7 @@ function initializePlugin() {
         sharedState.domElements.rocketButton = rocketButton;
         sharedState.domElements.menu = menu;
 
-        // 创建并注入遮罩层
+        // Tạo và chèn lớp làm mờ (backdrop)
         let backdrop = document.getElementById(Constants.ID_BACKDROP);
         if (!backdrop) {
             backdrop = document.createElement('div');
@@ -154,7 +154,7 @@ function initializePlugin() {
         }
         sharedState.domElements.backdrop = backdrop;
 
-        // 点击遮罩关闭菜单
+        // Đóng menu khi nhấp vào vùng mờ
         backdrop.addEventListener('click', () => {
             sharedState.menuVisible = false;
             import('./ui.js').then(({ updateMenuVisibilityUI }) => updateMenuVisibilityUI());
@@ -164,20 +164,20 @@ function initializePlugin() {
             handleQuickReplyClick,
             applyWhitelistDOMChanges,
             observeBarMutations,
-            populateWhitelistManagementUI, // 暴露给 whitelist.js 调用
-            openSortModal, // 暴露给 ui.js 调用
-            syncCombinedCheckbox // 暴露给全局调用
+            populateWhitelistManagementUI, // Để lộ cho whitelist.js gọi
+            openSortModal, // Để lộ cho ui.js gọi
+            syncCombinedCheckbox // Để lộ cho gọi toàn cục
         };
 
-        // 注入菜单到 body
+        // Chèn menu vào body
         document.body.appendChild(menu);
 
-        // (原白名单弹窗注入逻辑已移除，改为内嵌在设置面板中)
+        // (Logic chèn popup danh sách trắng trước đây đã bị gỡ bỏ, đổi thành nhúng trực tiếp vào bảng cài đặt)
 
-        // 注入图标管理弹窗遮罩 (确保层级在所有元素之上)
+        // Chèn lớp mờ (overlay) của popup quản lý biểu tượng (Đảm bảo lớp này nằm trên tất cả các phần tử khác)
         document.body.insertAdjacentHTML('beforeend', createModalOverlayHtml());
 
-        // 加载设置并应用 (现在读取到的一定是正确的数据)
+        // Tải cài đặt và áp dụng (Dữ liệu đọc ở hiện tại chắc chắn là dữ liệu đúng)
         loadAndApplySettings();
         setupEventListeners();
         setupMenuEvents();
@@ -185,19 +185,19 @@ function initializePlugin() {
         applyWhitelistDOMChanges();
         observeBarMutations();
 
-        // 启动时后台检测更新与公告检查 (不阻塞 UI)
+        // Chạy ngầm kiểm tra cập nhật và thông báo khi khởi động (Không làm nghẽn UI)
         setTimeout(() => {
             if (typeof refreshUpdateUI === 'function') {
-                refreshUpdateUI(false).catch(e => Logger.warn(LogCategory.UPDATE, '自动更新检测失败', e));
+                refreshUpdateUI(false).catch(e => Logger.warn(LogCategory.UPDATE, 'Kiểm tra cập nhật tự động thất bại', e));
             }
             if (typeof showAnnouncementModalIfNeeded === 'function') {
                 showAnnouncementModalIfNeeded();
             }
         }, 500); 
 
-        Logger.info(LogCategory.SYSTEM, '插件初始化完成');
+        Logger.info(LogCategory.SYSTEM, 'Tiện ích khởi tạo hoàn tất');
     } catch (err) {
-        Logger.error(LogCategory.SYSTEM, '插件初始化失败', err);
+        Logger.error(LogCategory.SYSTEM, 'Tiện ích khởi tạo thất bại', err);
     }
 }
 
@@ -208,31 +208,31 @@ function performInitialization() {
     initializePlugin();
     pluginInitialized = true;
 
-    // 初始 DOM 快照
+    // Ảnh chụp DOM ban đầu
     setTimeout(() => {
-        Logger.info(LogCategory.CORE, '插件初始化完成 - 初始 DOM 快照:', {
+        Logger.info(LogCategory.CORE, 'Tiện ích khởi tạo hoàn tất - Ảnh chụp DOM ban đầu:', {
             domStructure: Logger.getDomStructure('send_form')
         });
     }, 1000);
 
-    // 添加设置抽屉的点击监听器，打开面板时自动刷新白名单列表
+    // Thêm trình lắng nghe nhấp chuột cho ngăn cài đặt (Settings Drawer), tự động làm mới danh sách trắng khi mở bảng điều khiển
     const settingsDrawer = document.querySelector(`#${Constants.ID_SETTINGS_CONTAINER} .inline-drawer-toggle`);
     if (settingsDrawer) {
         settingsDrawer.addEventListener('click', () => {
-            // 延迟执行以确保动画开始或状态更新 (面板展开需要时间)
+            // Trì hoãn thực thi để đảm bảo bắt đầu hình động hoặc cập nhật trạng thái (Bảng điều khiển mở ra cần thời gian)
             setTimeout(() => {
                 if (typeof populateWhitelistManagementUI === 'function') {
                     populateWhitelistManagementUI();
                 }
-                // 动态同步"合并按钮"的最新状态
+                // Đồng bộ hóa động trạng thái mới nhất của "Nút gộp"
                 if (typeof window.quickReplyMenu?.syncCombinedCheckbox === 'function') {
                     window.quickReplyMenu.syncCombinedCheckbox();
                 }
-                // 面板可见后重新计算滑块位置
+                // Sau khi bảng điều khiển hiển thị, tính toán lại vị trí thanh trượt
                 if (typeof updateTabGliderState === 'function') {
                     updateTabGliderState();
                 }
-                // 刷新内置图标预览，修复页面刷新后预览显示为默认星月的问题
+                // Làm mới xem trước biểu tượng tích hợp, sửa lỗi hiển thị bản xem trước thành sao trăng mặc định sau khi tải lại trang
                 const settings = window.SillyTavern.getContext().extensionSettings[Constants.EXTENSION_NAME];
                 if (settings && settings.iconType && typeof updateBuiltinPreview === 'function') {
                     updateBuiltinPreview(settings.iconType);
@@ -247,25 +247,25 @@ function handleChatLoaded() {
         if (window.quickReplyMenu?.applyWhitelistDOMChanges) {
             window.quickReplyMenu.applyWhitelistDOMChanges();
         }
-        // 切换聊天时刷新角色卡图标
+        // Làm mới biểu tượng thẻ nhân vật khi chuyển đổi cuộc trò chuyện
         updateIconDisplay();
-        // 切换聊天时刷新角色卡预览
+        // Làm mới xem trước thẻ nhân vật khi chuyển đổi cuộc trò chuyện
         updateCharacterPreview();
     }, 500);
 }
 
 (function () {
-    // 注入设置面板 (Settings Drawer) - 修改注入目标为 #qr_container
+    // Chèn bảng cài đặt (Settings Drawer) - Thay đổi mục tiêu chèn thành #qr_container
     const injectSettings = () => {
         const targetContainer = document.getElementById('qr_container');
         if (targetContainer) {
             const settingsHtml = createSettingsHtml();
             targetContainer.insertAdjacentHTML('beforeend', settingsHtml);
         } else {
-            // 回退逻辑：如果找不到 qr_container，记录警告并尝试使用旧逻辑（可选，或直接报错）
-            Logger.warn(LogCategory.SYSTEM, '目标容器 #qr_container 未找到');
+            // Logic dự phòng (Fallback): Nếu không tìm thấy qr_container, ghi lại cảnh báo và thử sử dụng logic cũ (tùy chọn, hoặc có thể báo lỗi trực tiếp)
+            Logger.warn(LogCategory.SYSTEM, 'Không tìm thấy container đích #qr_container');
 
-            // 为了兼容性，如果没有找到目标容器，依然尝试注入到 extensions_settings 防止设置彻底丢失
+            // Để đảm bảo tính tương thích, nếu không tìm thấy container đích, vẫn thử chèn vào extensions_settings để ngăn việc cài đặt bị mất hoàn toàn
             let fallbackContainer = document.getElementById('extensions_settings');
             if (!fallbackContainer) {
                 fallbackContainer = document.createElement('div');
@@ -279,12 +279,12 @@ function handleChatLoaded() {
     };
     injectSettings();
 
-    // 等待 SillyTavern 就绪
+    // Chờ SillyTavern sẵn sàng
     const waitForSillyTavernContext = () => {
         if (window.SillyTavern && typeof window.SillyTavern.getContext === 'function') {
             const context = window.SillyTavern.getContext();
             if (context && context.eventSource && context.eventTypes?.APP_READY) {
-                // APP_READY 意味着 ST 的所有设置（包括 settings.json）都已加载完毕
+                // APP_READY có nghĩa là tất cả các cài đặt của ST (bao gồm cả settings.json) đã được tải xong
                 context.eventSource.once(context.eventTypes.APP_READY, performInitialization);
                 if (context.eventTypes.CHAT_CHANGED) {
                     context.eventSource.on(context.eventTypes.CHAT_CHANGED, handleChatLoaded);

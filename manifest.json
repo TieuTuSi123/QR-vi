@@ -1,5 +1,5 @@
 {
-    "display_name": "QR助手",
+    "display_name": "QR Assistant",
     "loading_order": 101,
     "requires": [],
     "optional": [],
@@ -10,18 +10,3 @@
     "homePage": ""
 
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

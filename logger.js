@@ -1,4 +1,4 @@
-// logger.js - 日志核心模块
+// logger.js - Module cốt lõi ghi nhật ký (Log)
 
 export const LogLevel = {
     DEBUG: 0,
@@ -20,13 +20,13 @@ export const LogCategory = {
 class LoggerSystem {
     constructor() {
         this.logs = [];
-        this.maxLogs = 1000; // 限制内存中存储的日志数量
-        this.currentLevel = LogLevel.INFO; // 默认级别 (INFO)
+        this.maxLogs = 1000; // Giới hạn số lượng nhật ký lưu trữ trong bộ nhớ
+        this.currentLevel = LogLevel.INFO; // Cấp độ mặc định (INFO)
         this.listeners = [];
     }
 
     /**
-     * 设置日志级别
+     * Đặt cấp độ nhật ký
      * @param {number} level
      */
     setLevel(level) {
@@ -34,25 +34,25 @@ class LoggerSystem {
     }
 
     /**
-     * 添加日志
-     * @param {number} level - 日志级别
-     * @param {string} category - 日志分类
-     * @param {string} message - 消息内容
-     * @param {any} [data] - 附加数据
+     * Thêm nhật ký
+     * @param {number} level - Cấp độ nhật ký
+     * @param {string} category - Phân loại nhật ký
+     * @param {string} message - Nội dung tin nhắn
+     * @param {any} [data] - Dữ liệu bổ sung
      */
     _add(level, category, message, data = null) {
-        // 修改：不再在入口处拦截低等级日志，确保内存中记录所有历史
+        // Sửa đổi: Không chặn các nhật ký cấp thấp ở đầu vào nữa, đảm bảo ghi lại tất cả lịch sử trong bộ nhớ
         // if (level < this.currentLevel) return;
 
-        // 特殊处理 Error 对象，因为 JSON.stringify(new Error()) 会返回 {}
-        // 我们需要将其属性显式提取出来，以便后续 JSON 导出和 UI 渲染
+        // Xử lý đặc biệt đối tượng Error, vì JSON.stringify(new Error()) sẽ trả về {}
+        // Chúng ta cần trích xuất rõ ràng các thuộc tính của nó để xuất JSON và hiển thị (render) UI sau này
         let safeData = data;
         if (data instanceof Error) {
             safeData = {
                 name: data.name,
                 message: data.message,
                 stack: data.stack,
-                isError: true // 标记这是一个错误对象
+                isError: true // Đánh dấu đây là một đối tượng lỗi
             };
         }
 
@@ -69,24 +69,24 @@ class LoggerSystem {
 
         this.logs.push(logEntry);
 
-        // 维持队列长度
+        // Duy trì độ dài hàng đợi
         if (this.logs.length > this.maxLogs) {
             this.logs.shift();
         }
 
-        // 修改：仅当满足当前等级时，才输出到浏览器控制台，避免刷屏
+        // Sửa đổi: Chỉ xuất ra bảng điều khiển trình duyệt khi đáp ứng cấp độ hiện tại, tránh trôi màn hình (spam)
         if (level >= this.currentLevel) {
             this._consolePrint(logEntry);
         }
 
-        // 通知监听器（用于更新UI）
+        // Thông báo cho các trình lắng nghe (dùng để cập nhật UI)
         this._notifyListeners(logEntry);
     }
 
     _consolePrint(entry) {
         const style = `color: ${this._getColor(entry.level)}; font-weight: bold;`;
-        // 增加插件名称前缀，方便在控制台筛选
-        const prefix = `[QR助手] [${entry.category}]`;
+        // Thêm tiền tố tên plugin để dễ dàng lọc trong bảng điều khiển
+        const prefix = `[QR Assistant] [${entry.category}]`;
         if (entry.data) {
             console.log(`%c${prefix} ${entry.message}`, style, entry.data);
         } else {
@@ -109,7 +109,7 @@ class LoggerSystem {
     error(category, message, data) { this._add(LogLevel.ERROR, category, message, data); }
 
     /**
-     * 导出日志为文本
+     * Xuất nhật ký dưới dạng văn bản
      */
     exportLogs() {
         return this.logs.map(log => {
@@ -119,11 +119,11 @@ class LoggerSystem {
     }
 
     /**
-     * 清空日志
+     * Xóa sạch nhật ký
      */
     clear() {
         this.logs = [];
-        this._notifyListeners(null); // null 视为清空信号
+        this._notifyListeners(null); // null được xem là tín hiệu xóa sạch
     }
 
     subscribe(callback) {

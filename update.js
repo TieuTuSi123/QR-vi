@@ -1,11 +1,11 @@
 // update.js
 import * as Constants from './constants.js';
 import { Logger, LogCategory } from './logger.js';
-// 引入酒馆核心工具函数，用于生成合法的请求头（包含 CSRF Token）
+// Import hàm công cụ cốt lõi của SillyTavern để tạo tiêu đề yêu cầu hợp lệ (bao gồm CSRF Token)
 import { getRequestHeaders } from '../../../../script.js';
 import { translate } from '../../../i18n.js';
 
-// 远程仓库配置
+// Cấu hình kho lưu trữ từ xa
 const REPO_ROOT = "https://raw.githubusercontent.com/uhhhh15/QR/main";
 const MANIFEST_URL = `${REPO_ROOT}/manifest.json`;
 const CHANGELOG_URL = `${REPO_ROOT}/CHANGELOG.md`;
@@ -14,27 +14,27 @@ const KEY_LAST_CHECK = `${Constants.EXTENSION_NAME}_last_update_check`;
 const KEY_UPDATE_INFO = `${Constants.EXTENSION_NAME}_update_info`;
 
 /**
- * 异步获取本地插件版本 (针对 display_name 和 third-party 路径优化)
+ * Lấy phiên bản tiện ích cục bộ không đồng bộ (tối ưu hóa cho display_name và đường dẫn third-party)
  */
 async function getLocalVersion() {
     try {
-        // 1. 调用后端 API 发现所有插件
-        // 返回的 ext.name 实际上是路径，例如 "third-party/QR"
+        // 1. Gọi API backend để khám phá tất cả tiện ích
+        // ext.name trả về thực chất là đường dẫn, ví dụ "third-party/QR"
         const discoverResponse = await fetch('/api/extensions/discover');
         if (!discoverResponse.ok) return "Error (API)";
         
         const installedExtensions = await discoverResponse.json(); 
 
-        // 2. 并发读取 manifest
+        // 2. Đọc đồng thời các tệp manifest
         const manifestPromises = installedExtensions.map(async (ext) => {
             try {
-                // 注意：这里 fetch 需要用 ext.name (即完整路径)
+                // Lưu ý: fetch ở đây cần dùng ext.name (tức là đường dẫn đầy đủ)
                 const res = await fetch(`/scripts/extensions/${ext.name}/manifest.json`);
                 if (res.ok) {
                     const json = await res.json();
                     return {
                         manifest: json,
-                        folderPath: ext.name // 保存 "third-party/QR"
+                        folderPath: ext.name // Lưu "third-party/QR"
                     };
                 }
             } catch (e) {}
@@ -44,14 +44,14 @@ async function getLocalVersion() {
         const results = await Promise.all(manifestPromises);
         const validResults = results.filter(r => r !== null);
 
-        // 3. 匹配逻辑
+        // 3. Logic khớp
         const target = validResults.find(item => {
             const m = item.manifest;
             const folder = item.folderPath;
             
-            if (m.display_name === "QR助手") return true;
+            if (m.display_name === "QR Assistant") return true;
 
-            // 只要路径以 /QR 结尾，或者就是 QR
+            // Chỉ cần đường dẫn kết thúc bằng /QR, hoặc chính là QR
             if (folder === "QR" || folder.endsWith("/QR") || folder.endsWith("/qr-assistant")) {
                 return true;
             }
@@ -60,14 +60,14 @@ async function getLocalVersion() {
         });
 
         if (target) {
-            Logger.info(LogCategory.UPDATE, `发现本地插件: ${target.folderPath}, 版本: ${target.manifest.version}`);
+            Logger.info(LogCategory.UPDATE, `Phát hiện tiện ích cục bộ: ${target.folderPath}, phiên bản: ${target.manifest.version}`);
             return target.manifest.version || "No Version";
         }
 
         return "Unknown";
 
     } catch (error) {
-        Logger.error(LogCategory.UPDATE, '本地版本检查失败', error);
+        Logger.error(LogCategory.UPDATE, 'Kiểm tra phiên bản cục bộ thất bại', error);
         return "Error";
     }
 }
@@ -101,58 +101,58 @@ export async function checkForUpdates(force = false) {
     const now = Date.now();
     const lastCheck = localStorage.getItem(KEY_LAST_CHECK);
     
-    // 1. 每次都实时获取本地版本
-    // 这一点开销很小，因为它只读取本地文件
+    // 1. Lấy phiên bản cục bộ theo thời gian thực mỗi lần
+    // Mức tiêu tốn cho việc này rất nhỏ vì nó chỉ đọc tệp cục bộ
     const localVer = await getLocalVersion();
     
     let remoteVer = null;
     let usedCache = false;
 
-    // 2. 尝试获取远程版本
-    // 如果不是强制刷新，且缓存未过期(24h)，则尝试从缓存中提取远程版本号
+    // 2. Cố gắng lấy phiên bản từ xa
+    // Nếu không phải làm mới bắt buộc và bộ nhớ cache chưa hết hạn (24h), hãy thử trích xuất số phiên bản từ xa từ bộ nhớ cache
     if (!force && lastCheck && (now - parseInt(lastCheck) < 86400000)) {
         const cachedStr = localStorage.getItem(KEY_UPDATE_INFO);
         if (cachedStr) {
             try {
                 const cachedObj = JSON.parse(cachedStr);
-                // 我们只信任缓存里的 latestVersion，不信任它的 localVersion 或 hasUpdate
+                // Chúng ta chỉ tin tưởng latestVersion trong cache, không tin tưởng localVersion hoặc hasUpdate của nó
                 if (cachedObj && cachedObj.latestVersion && cachedObj.latestVersion !== "Check Failed") {
                     remoteVer = cachedObj.latestVersion;
                     usedCache = true;
                 }
             } catch (e) {
-                // JSON 解析失败，忽略缓存
+                // Phân tích JSON thất bại, bỏ qua cache
             }
         }
     }
 
-    // 3. 如果没有命中缓存（或强制刷新），则请求 GitHub API
+    // 3. Nếu không trúng cache (hoặc làm mới bắt buộc), hãy yêu cầu GitHub API
     if (!remoteVer) {
         remoteVer = await getRemoteVersion();
         
-        // 只有成功获取到远程版本才更新时间戳
+        // Chỉ cập nhật dấu thời gian khi lấy phiên bản từ xa thành công
         if (remoteVer) {
             localStorage.setItem(KEY_LAST_CHECK, now.toString());
         }
     }
 
-    // 4. 实时进行版本比对
-    // 使用“实时的 localVer”和“可能来自缓存的 remoteVer”进行比对
+    // 4. So sánh phiên bản theo thời gian thực
+    // Sử dụng "localVer thực tế" và "remoteVer có thể từ cache" để so sánh
     const hasUpdate = (remoteVer && localVer !== "Unknown" && localVer !== "Error") 
         ? compareVersions(remoteVer, localVer) > 0 
         : false;
 
-    // 构建结果对象
+    // Xây dựng đối tượng kết quả
     const result = {
         hasUpdate: hasUpdate,
         latestVersion: remoteVer || "Check Failed",
-        localVersion: localVer, // 这里使用的是最新的本地版本
+        localVersion: localVer, // Ở đây sử dụng phiên bản cục bộ mới nhất
         checkedAt: usedCache ? parseInt(lastCheck || now) : now
     };
 
-    // 5. 更新缓存内容
-    // 即使我们用了缓存的 remoteVer，把最新的 result 存回去也是个好习惯
-    // 这样如果用户下次刷新页面，缓存里的 localVersion 就是对的了（虽然我们上面的逻辑已经忽略了它）
+    // 5. Cập nhật nội dung cache
+    // Ngay cả khi chúng ta dùng remoteVer từ cache, việc lưu lại result mới nhất vẫn là một thói quen tốt
+    // Bằng cách này, nếu người dùng làm mới trang lần sau, localVersion trong cache sẽ chính xác (mặc dù logic bên trên của chúng ta đã bỏ qua nó)
     if (remoteVer) {
         localStorage.setItem(KEY_UPDATE_INFO, JSON.stringify(result));
     }
@@ -165,30 +165,30 @@ export async function getChangelog() {
         const response = await fetch(CHANGELOG_URL + `?t=${Date.now()}`);
         return await response.text();
     } catch (e) {
-        return translate("无法获取更新日志。", 'qra_changelog_unavailable');
+        return translate("Không thể lấy nhật ký cập nhật.", 'qra_changelog_unavailable');
     }
 }
 
 export async function performUpdate() {
     try {
-        // 重新执行查找逻辑以获取准确的 folderPath
+        // Thực thi lại logic tìm kiếm để lấy folderPath chính xác
         const discoverResponse = await fetch('/api/extensions/discover');
         const extensions = await discoverResponse.json();
         let targetFolder = null;
         let isGlobal = false;
 
-        // 简单的遍历查找
+        // Duyệt qua tìm kiếm đơn giản
         for (const ext of extensions) {
             try {
                 const res = await fetch(`/scripts/extensions/${ext.name}/manifest.json`);
                 if (res.ok) {
                     const m = await res.json();
-                    // 同样的匹配逻辑
-                    if (m.display_name === "QR助手" ||
+                    // Logic khớp tương tự
+                    if (m.display_name === "QR Assistant" ||
                         ext.name.endsWith("/QR") ||
                         ext.name === "QR") {
-                        targetFolder = ext.name; // 这里会是 "third-party/QR"
-                        isGlobal = ext.type === 'global'; // 捕获扩展类型
+                        targetFolder = ext.name; // Ở đây sẽ là "third-party/QR"
+                        isGlobal = ext.type === 'global'; // Ghi nhận loại tiện ích
                         break;
                     }
                 }
@@ -196,17 +196,17 @@ export async function performUpdate() {
         }
 
         if (!targetFolder) {
-            Logger.error(LogCategory.UPDATE, '未找到扩展文件夹，无法更新');
+            Logger.error(LogCategory.UPDATE, 'Không tìm thấy thư mục tiện ích, không thể cập nhật');
             return { ok: false };
         }
 
-        Logger.info(LogCategory.UPDATE, `正在更新扩展: ${targetFolder}`);
+        Logger.info(LogCategory.UPDATE, `Đang cập nhật tiện ích: ${targetFolder}`);
 
-        // 后端 API 需要剥离 "third-party/" 前缀的短名称，并显式传递 global 参数
+        // Backend API cần loại bỏ tiền tố "third-party/" để lấy tên ngắn và truyền rõ tham số global
         const shortName = targetFolder.replace(/^third-party\//, '');
 
-        // 使用 getRequestHeaders() 替代手动拼凑
-        // getRequestHeaders() 会自动返回 { 'Content-Type': 'application/json', 'X-CSRF-Token': '...' }
+        // Sử dụng getRequestHeaders() thay vì tự ghép thủ công
+        // getRequestHeaders() sẽ tự động trả về { 'Content-Type': 'application/json', 'X-CSRF-Token': '...' }
         return await fetch('/api/extensions/update', {
             method: 'POST',
             headers: getRequestHeaders(),
@@ -216,7 +216,7 @@ export async function performUpdate() {
             })
         });
     } catch (e) {
-        Logger.error(LogCategory.UPDATE, '更新失败', e);
+        Logger.error(LogCategory.UPDATE, 'Cập nhật thất bại', e);
         return { ok: false };
     }
 

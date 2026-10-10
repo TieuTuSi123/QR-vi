@@ -1,12 +1,12 @@
 /* ===========================================================
-   1. 核心功能样式 (显隐控制) - 保持不变
+   1. Kiểu dáng tính năng cốt lõi (Kiểm soát hiển thị) - Giữ nguyên
    =========================================================== */
 
 body.qra-enabled .qrq-hidden-by-plugin {
     display: none !important;
 }
 
-/* 合并包裹器 (Wrapper) */
+/* Trình bọc gộp nút (Wrapper) */
 body.qra-enabled #qr--bar > .qr--buttons.qrq-wrapper-visible {
     display: flex !important; 
     flex-wrap: wrap; 
@@ -14,10 +14,10 @@ body.qra-enabled #qr--bar > .qr--buttons.qrq-wrapper-visible {
     align-items: center; 
 }
 
-/* 布局核心：display: contents */
-/* 限制 display: contents 仅作用于 div 容器，防止 LWB 按钮样式（背景/边框）被剥离 */
-/* 仅对 QR v2 容器、JSR 容器、内置工具栏等"包装器型"div 应用 display: contents，
-   排除第三方按钮（如 pt-wb-common-button、zero-preset-btn）以免破坏其原有样式 */
+/* Cốt lõi bố cục: display: contents */
+/* Giới hạn display: contents chỉ tác dụng lên bộ chứa div, ngăn chặn việc kiểu dáng nút LWB (nền/viền) bị bong tróc */
+/* Chỉ áp dụng display: contents cho các div dạng "bộ bọc" như bộ chứa QR v2, bộ chứa JSR, thanh công cụ tích hợp,...
+   Loại trừ các nút của bên thứ ba (như pt-wb-common-button, zero-preset-btn) để tránh làm hỏng kiểu dáng nguyên bản của chúng */
 body.qra-enabled .qrq-wrapper-visible .qr--buttons.qrq-whitelisted-original,
 body.qra-enabled .qrq-wrapper-visible div[id^="script_container_"].qrq-whitelisted-original,
 body.qra-enabled .qrq-wrapper-visible #input_helper_toolbar,
@@ -25,7 +25,7 @@ body.qra-enabled .qrq-wrapper-visible #custom_buttons_container {
     display: contents !important;
 }
 
-/* 非合并模式 */
+/* Chế độ không gộp */
 body.qra-enabled #qr--bar > .qrq-whitelisted-original:not(.qrq-wrapper-visible),
 body.qra-enabled #qr--bar > div[id^="script_container_"].qrq-whitelisted-original {
      display: flex !important;
@@ -33,7 +33,7 @@ body.qra-enabled #qr--bar > div[id^="script_container_"].qrq-whitelisted-origina
      align-items: center;
  }
 
-/* 禁用恢复 */
+/* Khôi phục khi vô hiệu hóa */
 body.qra-disabled #qr--bar { height: auto !important; overflow: visible !important; }
 body.qra-disabled #quick-reply-rocket-button { display: none !important; }
 body.qra-disabled .qrq-hidden-by-plugin,
@@ -41,32 +41,32 @@ body.qra-disabled .qrq-whitelisted-original,
 body.qra-disabled .qrq-wrapper-visible { display: initial !important; }
 
 /* ===========================================================
-   1.5. 混合容器逻辑 (修复非合并模式层级问题)
+   1.5. Logic bộ chứa hỗn hợp (Sửa lỗi phân cấp ở chế độ không gộp)
    =========================================================== */
 
 /*
-   场景：容器本身未在白名单(即QR Set未启用)，但内部包含白名单子元素(如LWB按钮)。
-   行为：强制显示容器，并重置布局。
+   Bối cảnh: Bản thân bộ chứa không nằm trong danh sách trắng (tức là QR Set chưa được bật), nhưng bên trong có chứa phần tử con thuộc danh sách trắng (như nút LWB).
+   Hành vi: Buộc hiển thị bộ chứa và thiết lập lại bố cục.
 */
 body.qra-enabled #qr--bar .qrq-mixed-content {
     display: flex !important;
     flex-wrap: wrap;
     align-items: center;
     gap: 5px;
-    height: auto !important; /* 防止被父级规则压缩 */
+    height: auto !important; /* Tránh bị nén bởi các quy tắc của lớp cha */
     overflow: visible !important;
 }
 
 /*
-   关键逻辑：在混合容器中，隐藏所有未被明确标记为"原样保留"的子元素。
-   这会隐藏同层级的普通 QR 按钮，只留下 LWB 或其他白名单按钮。
+   Logic then chốt: Trong bộ chứa hỗn hợp, ẩn tất cả các phần tử con không được đánh dấu rõ ràng là "giữ nguyên trạng thái gốc".
+   Điều này sẽ ẩn các nút QR thông thường cùng cấp, chỉ để lại LWB hoặc các nút khác trong danh sách trắng.
 */
 body.qra-enabled #qr--bar .qrq-mixed-content > :not(.qrq-whitelisted-original) {
     display: none !important;
 }
 
 /* ===========================================================
-   2.5. 遮罩层样式
+   2.5. Kiểu dáng lớp phủ mờ (Backdrop)
    =========================================================== */
 #quick-reply-backdrop {
     position: fixed;
@@ -74,7 +74,7 @@ body.qra-enabled #qr--bar .qrq-mixed-content > :not(.qrq-whitelisted-original) {
     left: 0;
     width: 100vw;
     height: 100vh;
-    z-index: 9998; /* 比菜单 (9999) 低一层 */
+    z-index: 9998; /* Thấp hơn menu (9999) một cấp */
     background-color: rgba(0, 0, 0, 0.3);
     backdrop-filter: blur(4px);
     -webkit-backdrop-filter: blur(4px);
@@ -89,7 +89,7 @@ body.qra-enabled #qr--bar .qrq-mixed-content > :not(.qrq-whitelisted-original) {
 }
 
 /* ===========================================================
-   2. 小火箭按钮 - 保持不变
+   2. Nút tên lửa nhỏ - Giữ nguyên
    =========================================================== */
 #quick-reply-rocket-button {
     font-size: 1.2em;
@@ -108,7 +108,7 @@ body.qra-enabled #qr--bar .qrq-mixed-content > :not(.qrq-whitelisted-original) {
     background-repeat: no-repeat;
 }
 
-/* 当前角色卡头像样式 (参考 QuickPersona) */
+/* Kiểu dáng ảnh đại diện thẻ nhân vật hiện tại (Tham khảo QuickPersona) */
 #quick-reply-rocket-button .qr-character-avatar {
     border-radius: 50%;
     border: 1px solid transparent;
@@ -119,12 +119,12 @@ body.qra-enabled #qr--bar .qrq-mixed-content > :not(.qrq-whitelisted-original) {
     transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-/* 菜单打开时角色卡头像旋转 180° */
+/* Xoay ảnh đại diện thẻ nhân vật 180° khi mở menu */
 #quick-reply-rocket-button.qr-avatar-rotated .qr-character-avatar {
     transform: rotate(180deg);
 }
 
-/* 预览区角色卡头像 - 正圆形 */
+/* Ảnh đại diện thẻ nhân vật trong khu vực xem trước - Hình tròn đều */
 .qr-icon-preview-box img.qr-character-preview-avatar {
     width: 80px;
     height: 80px;
@@ -134,11 +134,11 @@ body.qra-enabled #qr--bar .qrq-mixed-content > :not(.qrq-whitelisted-original) {
 }
 
 /* ===========================================================
-   3. 全新 UI 引擎 (CSS 变量系统)
+   3. Engine Giao diện người dùng mới (Hệ thống biến CSS)
    =========================================================== */
 
-/* --- 默认主题定义 (Default / Light) --- */
-/* 这里定义基础变量，对应 "Light" 选项。风格类似于 Ceramic/Paper 的混合体 */
+/* --- Định nghĩa chủ đề mặc định (Default / Light) --- */
+/* Xác định các biến cơ sở ở đây, tương ứng với tùy chọn "Light". Phong cách tương tự như sự pha trộn giữa Ceramic và Paper */
 :root {
     --qp-bg: #ffffff;
     --qp-backdrop: none;
@@ -155,39 +155,39 @@ body.qra-enabled #qr--bar .qrq-mixed-content > :not(.qrq-whitelisted-original) {
     --qp-radius-sm: 8px;
     --qp-scroll-thumb: rgba(0, 0, 0, 0.15);
     
-    /* 使用 inherit，强制继承 body 的字体设置 */
+    /* Dùng inherit, buộc kế thừa thiết lập phông chữ của thẻ body */
     --qp-font-family: inherit;
 
-    /* 自适应比例变量 */
+    /* Biến số tỷ lệ tự thích ứng */
     --qp-item-padding: 10px 14px;
-    /* 修改：使用酒馆主字号变量 */
+    /* Sửa đổi: Sử dụng biến cỡ chữ chính của SillyTavern */
     --qp-item-font-size: var(--mainFontSize);
     --qp-column-padding: 12px;
     --qp-item-margin: 6px;
 }
 
-/* 针对移动端（屏幕宽度小于 600px）进行紧凑化调整 */
+/* Điều chỉnh bố cục nhỏ gọn dành riêng cho thiết bị di động (chiều rộng màn hình dưới 600px) */
 @media (max-width: 600px) {
     :root {
         --qp-item-padding: 12px 12px;
-        /* 移除固定的 12px 字号，保持继承 var(--mainFontSize) 以同步聊天文本大小 */
+        /* Bỏ cỡ chữ 12px cố định, duy trì kế thừa var(--mainFontSize) để đồng bộ với kích thước văn bản chat */
         --qp-column-padding: 8px;
         --qp-item-margin: 4px;
     }
 }
 
-/* 移动端特殊调整：显示 9 个按钮 */
+/* Điều chỉnh đặc biệt cho di động: Hiển thị 9 nút */
 @media (max-width: 600px) {
     #qr-assistant .action-list {
-        /* 移动端限制显示 9 个按钮 (字号*行高1.4 + 上下内边距24px + 下外边距4px) */
-        /* 注：移动端内边距为 12px*2=24px，外边距为 4px */
+        /* Giới hạn hiển thị 9 nút trên di động (Cỡ chữ * chiều cao dòng 1.4 + lề trong trên dưới 24px + lề ngoài dưới 4px) */
+        /* Lưu ý: Lề trong trên di động là 12px * 2 = 24px, lề ngoài là 4px */
         max-height: calc(9 * (var(--qp-item-font-size) * 1.4 + 24px + var(--qp-item-margin)) + 10px) !important;
     }
 }
 
-/* --- 主题覆盖 (Themes Overrides) --- */
+/* --- Ghi đè chủ đề (Themes Overrides) --- */
 
-/* 1. Paper (和纸) */
+/* 1. Paper (Giấy Washi) */
 body.theme-paper {
     --qp-bg: #f9f7f1;
     --qp-backdrop: none;
@@ -203,7 +203,7 @@ body.theme-paper {
     --qp-scroll-thumb: #dcd0c0;
 }
 
-/* 2. Aurora (梦幻极光) */
+/* 2. Aurora (Cực quang diệu kỳ) */
 body.theme-aurora {
     --qp-bg: linear-gradient(160deg, rgba(30,30,40,0.85) 0%, rgba(20,20,30,0.9) 100%);
     --qp-backdrop: blur(12px);
@@ -219,7 +219,7 @@ body.theme-aurora {
     --qp-scroll-thumb: rgba(255,255,255,0.15);
 }
 
-/* 3. Smoked Glass (烟熏磨砂) */
+/* 3. Smoked Glass (Kính mờ hun khói) */
 body.theme-smoked {
     --qp-bg: rgba(30, 30, 30, 0.6);
     --qp-backdrop: blur(20px) saturate(150%);
@@ -235,7 +235,7 @@ body.theme-smoked {
     --qp-scroll-thumb: rgba(255,255,255,0.1);
 }
 
-/* 4. Ceramic (白瓷) */
+/* 4. Ceramic (Sứ trắng) */
 body.theme-ceramic {
     --qp-bg: #fdfdfd;
     --qp-backdrop: none;
@@ -251,7 +251,7 @@ body.theme-ceramic {
     --qp-scroll-thumb: #ccc;
 }
 
-/* 5. Lavender (薰衣草) */
+/* 5. Lavender (Oải hương) */
 body.theme-lavender {
     --qp-bg: #f8f8fc;
     --qp-backdrop: none;
@@ -267,7 +267,7 @@ body.theme-lavender {
     --qp-scroll-thumb: #d0d0e0;
 }
 
-/* 6. Forest (迷雾森林) */
+/* 6. Forest (Rừng sương mù) */
 body.theme-forest {
     --qp-bg: rgba(30, 40, 35, 0.75);
     --qp-backdrop: blur(15px);
@@ -283,34 +283,34 @@ body.theme-forest {
     --qp-scroll-thumb: rgba(255,255,255,0.1);
 }
 
-/* 8. Dark Theme (暗黑模式) - 基于用户定制 */
+/* 8. Dark Theme (Giao diện tối) - Dựa trên tùy chỉnh người dùng */
 body.theme-dark {
-    /* 容器背景：极深灰/纯黑 #121212 */
+    /* Nền bộ chứa: Xám rất đậm/Đen tuyền #121212 */
     --qp-bg: #000000;
     --qp-backdrop: none;
-    /* 边框：深灰 */
+    /* Viền: Xám đậm */
     --qp-border: #000000;
     --qp-radius: 16px;
-    /* 文字颜色：白 */
+    /* Màu chữ: Trắng */
     --qp-text: #ffffff;
     
-    /* 列表项背景：透明 */
+    /* Nền mục danh sách: Trong suốt */
     --qp-item-bg: transparent;
-    /* 悬停颜色：微亮紫色 */
+    /* Màu khi di chuột: Tím sáng nhẹ */
     --qp-item-hover: rgba(216, 168, 231, 1);
-    /* 悬停文字颜色 */
+    /* Màu chữ khi di chuột */
     --qp-item-hover-text: rgba(216, 168, 231, 0.85);
     
-    /* 激活项背景：去除 */
+    /* Nền mục đang chọn: Xóa bỏ */
     --qp-item-active: transparent;
-    /* 强调色：去除 */
+    /* Màu nhấn: Xóa bỏ */
     --qp-accent: transparent;
     
     --qp-radius-sm: 8px;
     --qp-scroll-thumb: rgba(255,255,255,0.2);
 }
 
-/* 7. System Theme (跟随酒馆) - 变量映射 */
+/* 7. System Theme (Theo SillyTavern) - Ánh xạ biến */
 body.qra-theme-system {
     --qp-bg: var(--SmartThemeBlurTintColor);
     --qp-backdrop: blur(var(--SmartThemeBlurStrength));
@@ -319,15 +319,15 @@ body.qra-theme-system {
     --qp-text: var(--SmartThemeBodyColor);
 
     /*
-       修改重点：
-       1. 背景改为半透明强调色 (原激活态颜色: 15% 浓度)
+       Trọng tâm sửa đổi:
+       1. Đổi nền thành màu nhấn bán trong suốt (Màu trạng thái kích hoạt gốc: Nồng độ 15%)
     */
     --qp-item-bg: color-mix(in srgb, var(--SmartThemeQuoteColor), transparent 95%);
 
-    /* 悬停：加深至 15% 浓度，提供交互反馈 */
+    /* Di chuột: Tăng độ đậm lên 15% để phản hồi tương tác */
     --qp-item-hover: color-mix(in srgb, var(--SmartThemeQuoteColor), transparent 85%);
 
-    /* 激活：加深至 25% 浓度 */
+    /* Kích hoạt: Tăng độ đậm lên 25% */
     --qp-item-active: color-mix(in srgb, var(--SmartThemeQuoteColor), transparent 75%);
 
     --qp-accent: var(--SmartThemeEmColor);
@@ -337,21 +337,21 @@ body.qra-theme-system {
 }
 
 /* ===========================================================
-   4. 菜单布局结构 (应用变量)
+   4. Cấu trúc bố cục menu (Ứng dụng biến)
    =========================================================== */
 
 #qr-assistant {
-    display: none; /* 默认隐藏 */
+    display: none; /* Ẩn theo mặc định */
     position: fixed;
     top: 50vh !important;
     left: 50vw !important;
     transform: translate(-50%, -50%) !important;
-    z-index: 9999 !important; /* 确保层级 */
+    z-index: 9999 !important; /* Đảm bảo phân cấp */
 
-    /* 核心布局修改：垂直排列，以便放置顶部 Header */
+    /* Sửa đổi bố cục cốt lõi: Xếp theo chiều dọc để đặt Header ở trên cùng */
     flex-direction: column !important;
 
-    /* 应用变量 - 强制锁定 */
+    /* Áp dụng biến - Khóa bắt buộc */
     background: var(--qp-bg) !important;
     backdrop-filter: var(--qp-backdrop) !important;
     -webkit-backdrop-filter: var(--qp-backdrop) !important;
@@ -362,38 +362,38 @@ body.qra-theme-system {
 
     font-family: var(--qp-font-family) !important;
     overflow: hidden !important;
-    /* 修改：仅对透明度和变换进行过渡 */
+    /* Sửa đổi: Chỉ thêm hiệu ứng chuyển tiếp cho độ trong suốt và phép biến đổi */
     transition: opacity 0.3s ease, visibility 0.3s ease, transform 0.3s ease;
 }
 
-/* 显示状态 */
+/* Trạng thái hiển thị */
 #qr-assistant.visible {
     display: flex !important;
 }
 
 #qr-assistant * { box-sizing: border-box; }
 
-/* 内容区域包裹层 (承接原来的横向布局) */
+/* Lớp bọc khu vực nội dung (Tiếp nối bố cục nằm ngang ban đầu) */
 .qr-body-container {
     display: flex;
     flex-direction: row;
-    flex: 1; /* 占据剩余高度 */
+    flex: 1; /* Chiếm khoảng trống chiều cao còn lại */
     width: 100%;
-    overflow: hidden; /* 防止溢出 */
-    min-height: 50px; /* 兜底最小高度，防止报错时只显示横杆 */
+    overflow: hidden; /* Ngăn chặn tràn */
+    min-height: 50px; /* Chiều cao tối thiểu dự phòng, tránh trường hợp chỉ hiện thanh ngang khi có lỗi */
 }
 
-/* --- 首次设置栏 (Onboarding Header) --- */
+/* --- Thanh thiết lập lần đầu (Onboarding Header) --- */
 #qr-assistant-onboarding-header {
     width: 100%;
-    background: rgba(0, 0, 0, 0.05); /* 只有轻微背景区分 */
+    background: rgba(0, 0, 0, 0.05); /* Chỉ dùng nền nhẹ để phân biệt */
     border-bottom: 1px solid var(--qp-border);
     padding: 8px 15px;
     display: flex;
     align-items: center;
     justify-content: space-between;
     gap: 10px;
-    flex-shrink: 0; /* 防止被压缩 */
+    flex-shrink: 0; /* Tránh bị bóp méo */
     animation: fadeIn 0.3s;
 }
 
@@ -404,7 +404,7 @@ body.qra-theme-system {
     font-size: 13px;
 }
 
-/* 增加 ID 前缀以提升权重 */
+/* Thêm tiền tố ID để tăng trọng số mức ưu tiên */
 #qr-assistant .qr-ob-select {
     background: var(--qp-item-bg) !important;
     color: var(--qp-text) !important;
@@ -432,7 +432,7 @@ body.qra-theme-system {
 }
 #qr-assistant .qr-ob-btn:hover { opacity: 0.9 !important; }
 
-/* --- 图标来源切换器 --- */
+/* --- Bộ chuyển đổi nguồn biểu tượng --- */
 .qr-ob-icon-source {
     position: relative;
 }
@@ -456,7 +456,7 @@ body.qra-theme-system {
     background: var(--qp-item-hover) !important;
 }
 
-/* 下拉菜单 */
+/* Menu thả xuống */
 .qr-ob-icon-menu {
     position: absolute;
     top: 100%;
@@ -509,7 +509,7 @@ body.qra-theme-system {
     opacity: 0.5;
 }
 
-/* --- 自定义图标引导弹窗 --- */
+/* --- Cửa sổ hướng dẫn biểu tượng tùy chỉnh --- */
 .qr-ob-guidance-overlay {
     position: absolute;
     top: 0;
@@ -563,10 +563,10 @@ body.qra-theme-system {
     flex: 1;
     width: 50%;
     min-width: 0;
-    padding: var(--qp-column-padding); /* 替换硬编码的 12px */
+    padding: var(--qp-column-padding); /* Thay thế lề 12px code cứng */
     display: flex;
     flex-direction: column;
-    /* 移除硬编码背景，保持透明以透出 qp-bg */
+    /* Gỡ bỏ nền code cứng, giữ độ trong suốt để lộ ra qp-bg */
     background: transparent;
 }
 
@@ -574,7 +574,7 @@ body.qra-theme-system {
     border-right: none;
 }
 
-/* 适当增加两栏之间的物理间隙 */
+/* Tăng khoảng cách vật lý giữa hai cột cho phù hợp */
 #qr-assistant .column {
     gap: 8px;
 }
@@ -587,21 +587,21 @@ body.qra-theme-system {
     font-style: italic;
     font-size: 14px;
     text-align: center;
-    /* 应用强调色变量，并降低不透明度 */
+    /* Dùng biến màu nhấn và giảm độ đục */
     color: var(--qp-text);
     opacity: 0.6;
 }
 
-/* 列表容器 */
+/* Bộ chứa danh sách */
 #qr-assistant .action-list {
     display: flex;
     flex-direction: column;
-    /* 关键：gap 设为 0，由 margin 控制分组 */
+    /* Then chốt: đặt gap bằng 0, dùng margin để phân nhóm */
     gap: 0;
     overflow-y: auto;
     padding: 0 4px;
 
-    /* 修改：电脑端限制显示 10 个按钮 (字号*行高1.4 + 上下内边距20px + 下外边距6px) */
+    /* Sửa đổi: Máy tính giới hạn hiển thị 10 nút (Cỡ chữ * chiều cao dòng 1.4 + lề trong trên dưới 20px + lề ngoài dưới 6px) */
     max-height: calc(10 * (var(--qp-item-font-size) * 1.4 + 20px + var(--qp-item-margin)) + 10px);
 
     height: auto;
@@ -610,34 +610,34 @@ body.qra-theme-system {
     overscroll-behavior: contain;
 }
 
-/* 滚动条逻辑 */
+/* Logic thanh cuộn */
 #qr-list-left { direction: rtl; }
 #qr-list-left .action-item,
 #qr-list-left .empty-state { direction: ltr; }
 
-/* 按钮项基础样式 */
+/* Kiểu dáng cơ bản cho mục nút */
 #qr-assistant .action-item {
     width: 100% !important;
     padding: var(--qp-item-padding) !important;
 
     /* ----------------------------------------------------
-       iOS 渲染修复核心区
+       Khu vực cốt lõi sửa lỗi hiển thị trên iOS
        ---------------------------------------------------- */
 
-    /* 1. 拆分 background 属性，严禁使用简写，防止纹理丢失 */
+    /* 1. Tách riêng thuộc tính background, nghiêm cấm dùng dạng viết tắt để tránh mất chi tiết bề mặt */
     background-color: var(--qp-item-bg) !important;
     background-image: none !important;
 
-    /* 2. iOS 样式重置：去掉苹果默认的"果冻"光泽和点击灰块 */
+    /* 2. Đặt lại kiểu dáng trên iOS: Bỏ đi hiệu ứng bóng "thạch" và khối xám khi chạm mặc định của Apple */
     -webkit-appearance: none !important;
     appearance: none !important;
     -webkit-tap-highlight-color: transparent;
 
-    /* 3. 预开启硬件加速：让按钮一开始就住在 GPU 里，
-       防止 hover 时从 CPU 搬家到 GPU 导致掉纹理 */
+    /* 3. Mở sẵn tăng tốc phần cứng: Để các nút nằm sẵn trong GPU ngay từ đầu,
+       ngăn ngừa việc chuyển từ CPU sang GPU khi di chuột làm mất chi tiết bề mặt */
     transform: translate3d(0, 0, 0);
     -webkit-transform: translate3d(0, 0, 0);
-    will-change: transform, background-color; /* 明确告诉浏览器我们要动这些 */
+    will-change: transform, background-color; /* Báo rõ cho trình duyệt biết ta sẽ thay đổi những thuộc tính này */
 
     /* ---------------------------------------------------- */
 
@@ -649,9 +649,9 @@ body.qra-theme-system {
     box-shadow: none !important;
     text-shadow: none !important;
 
-        /* --- 字体样式强制同步 --- */
-        font-family: inherit !important;     /* 强制继承 body 的字体 */
-        font-weight: inherit !important;     /* 强制继承 body 的字重，防止按钮变粗 */
+        /* --- Bắt buộc đồng bộ hóa kiểu phông chữ --- */
+        font-family: inherit !important;     /* Ép thừa kế phông chữ của thẻ body */
+        font-weight: inherit !important;     /* Ép thừa kế độ đậm phông chữ của thẻ body, tránh làm nút bị dày lên */
         font-size: var(--qp-item-font-size) !important;
 
         display: flex !important;
@@ -659,7 +659,7 @@ body.qra-theme-system {
     justify-content: center !important;
 
     cursor: pointer !important;
-    /* 优化动画曲线：使用较弹的贝塞尔曲线提升手感 */
+    /* Tối ưu đường cong hoạt ảnh: Dùng đường cong Bezier đàn hồi hơn để cải thiện cảm giác tương tác */
     transition: transform 0.2s cubic-bezier(0.2, 0.8, 0.2, 1),
                 background-color 0.15s ease,
                 color 0.15s ease;
@@ -677,7 +677,7 @@ body.qra-theme-system {
     white-space: nowrap !important;
     overflow: hidden !important;
 
-    /* 避免文字变糊 */
+    /* Tránh chữ bị nhòe */
     -webkit-font-smoothing: antialiased;
     backface-visibility: hidden;
 }
@@ -688,43 +688,43 @@ body.qra-theme-system {
     text-overflow: ellipsis !important;
     overflow: hidden !important;
     max-width: 100% !important;
-    color: inherit !important; /* 强制继承父级颜色 */
-    background: none !important; /* 确保文字背景透明 */
+    color: inherit !important; /* Bắt buộc thừa kế màu sắc của lớp cha */
+    background: none !important; /* Bảo đảm màu nền của văn bản là trong suốt */
 }
 
 /* ----------------------------------------------------
-   交互特效修复区
+   Khu vực sửa chữa hiệu ứng tương tác
    ---------------------------------------------------- */
 
-/* 悬停状态 (PC端/部分支持Hover的移动端) */
+/* Trạng thái di chuột (Trên PC/Thiết bị di động có hỗ trợ Hover) */
 #qr-assistant .action-item:hover {
     background-color: var(--qp-item-hover) !important;
     color: var(--qp-text) !important;
-    /* 删除 font-weight: 500 !important; 防止细字体悬停时抖动 */
+    /* Xóa font-weight: 500 !important; tránh làm phông chữ mỏng bị rung khi di chuột */
 
-    /* 按照要求：移除边框和阴影 */
+    /* Theo yêu cầu: Gỡ bỏ viền và bóng */
     border-color: transparent !important;
     box-shadow: none !important;
 
-    /* 仅保留上浮动效 (使用 translate3d 避免 iOS 渲染 Bug) */
+    /* Chỉ giữ lại hiệu ứng nổi lên (Dùng translate3d để né lỗi hiển thị trên iOS) */
     transform: translate3d(0, -2px, 0);
     -webkit-transform: translate3d(0, -2px, 0);
 
-    /* 严禁修改 z-index */
+    /* Nghiêm cấm sửa z-index */
     z-index: auto !important;
 }
 
-/* 激活/点击状态 (手指按下去的那一刻) */
+/* Trạng thái chọn/chạm (Khoảnh khắc ngón tay ấn xuống) */
 #qr-assistant .action-item:active,
 #qr-assistant .action-item.active {
     background-color: var(--qp-item-active) !important;
     color: var(--qp-text) !important;
 
-    /* 按照要求：确保无边框无阴影 */
+    /* Theo yêu cầu: Bảo đảm không có viền và bóng */
     border-color: transparent !important;
     box-shadow: none !important;
 
-    /* 物理按压反馈：轻微缩小 (使用 scale3d 保持 GPU 渲染) */
+    /* Phản hồi nhấn vật lý: Thu nhỏ nhẹ (Dùng scale3d để duy trì render bằng GPU) */
     transform: scale3d(0.96, 0.96, 1) translate3d(0, 0, 0);
     -webkit-transform: scale3d(0.96, 0.96, 1) translate3d(0, 0, 0);
 
@@ -732,81 +732,81 @@ body.qra-theme-system {
 }
 
 /* ===========================================================
-   5. 智能分组逻辑 (Grouping Logic) - 2.0 完美版
+   5. Logic phân nhóm thông minh (Grouping Logic) - Phiên bản hoàn hảo 2.0
    =========================================================== */
 
-/* --- 通用逻辑：去间距，实现无缝连接 --- */
+/* --- Logic chung: Xóa khoảng trống, tạo sự liền mạch --- */
 
-/* 组头：底部直角，去除下边距 */
+/* Đầu nhóm: Góc vuông ở dưới, xóa lề dưới */
 #qr-assistant .action-item.group-start {
     border-bottom-left-radius: 0 !important;
     border-bottom-right-radius: 0 !important;
     margin-bottom: 0 !important;
-    /* 移除之前的组内分割线，保持干净 */
+    /* Dẹp đường chia bên trong nhóm lúc trước, giữ cho gọn gàng */
     border-bottom: none !important;
 }
 
-/* 组中：四角直角，去除下边距 */
+/* Giữa nhóm: Góc vuông bốn phía, xóa lề dưới */
 #qr-assistant .action-item.group-middle {
     border-radius: 0 !important;
     margin-bottom: 0 !important;
-    /* 使用负边距消除像素级缝隙 */
+    /* Dùng lề âm để diệt sạch khe hở kích cỡ điểm ảnh */
     // margin-top: -1px !important;
     border-top: none !important;
     border-bottom: none !important;
-    /* 强制覆盖可能的阴影，防止出现横向黑线 */
+    /* Ép đè lên các bóng có thể sinh ra, cản việc nổi lên vệt đen ngang */
     box-shadow: none !important;
 }
 
-/* 组尾：顶部直角，保持组间大间距 */
+/* Cuối nhóm: Góc vuông ở trên, giữ khoảng cách rộng giữa các nhóm */
 #qr-assistant .action-item.group-end {
     border-top-left-radius: 0 !important;
     border-top-right-radius: 0 !important;
-    margin-bottom: 10px !important; /* 组间大间距 */
-    // margin-top: -1px !important;    /* 使用负边距消除与上一项的缝隙 */
+    margin-bottom: 10px !important; /* Khoảng cách rộng giữa các nhóm */
+    // margin-top: -1px !important;    /* Dùng lề âm để vá khe hở với mục phía trên */
     border-top: none !important;
 }
 
-/* 列表最后一个元素去除下边距 */
+/* Phần tử cuối cùng của danh sách thì loại bỏ lề dưới */
 #qr-assistant .action-item:last-child {
     margin-bottom: 0 !important;
 }
 
-/* --- [System 主题专属] 分组外边框 (Group Outline) --- */
-/* 已根据需求移除：去除边框，改用背景色区分 */
+/* --- [Dành riêng cho chủ đề System] Viền bọc ngoài nhóm (Group Outline) --- */
+/* Đã bị tháo theo yêu cầu: Cạo sạch viền, xài màu nền để làm dốc phân mảng */
 
 /* ===========================================================
-   6. 滚动条美化
+   6. Làm đẹp thanh cuộn
    =========================================================== */
 
 #qr-assistant .action-list::-webkit-scrollbar { width: 5px; }
 #qr-assistant .action-list::-webkit-scrollbar-track { background: transparent; }
 
-/* 默认隐藏或透明 */
+/* Mặc định ẩn hoặc trong suốt */
 #qr-assistant .action-list::-webkit-scrollbar-thumb {
     background-color: transparent;
     border-radius: 4px;
     transition: background-color 0.2s;
 }
 
-/* 滚动或悬停时显示 */
+/* Hiển thị khi cuộn hoặc di chuột */
 #qr-assistant .action-list.is-scrolling::-webkit-scrollbar-thumb {
     background-color: var(--qp-scroll-thumb);
 }
 
 /* ===========================================================
-   7. 白名单面板样式 (适配变量)
+   7. Kiểu dáng bảng danh sách trắng (Biến tương thích)
    =========================================================== */
 
-/* 白名单内嵌容器 */
+/* Khung chứa nhúng danh sách trắng */
 .qr-whitelist-inline-container {
     display: flex;
     justify-content: space-between;
     gap: 10px;
-    height: 300px; /* 固定高度，确保在 Drawer 内能滚动 */
+    height: 300px; /* Chiều cao cố định, bảo chứng khả năng cuộn bên trong Ngăn (Drawer) */
 }
 
-/* 原 .qr-whitelist-body 的简化版 */
+/* Bản mỏng nhẹ của .qr-whitelist-body cũ */
 .qr-whitelist-col {
     width: 48%;
     display: flex;
@@ -823,10 +823,10 @@ body.qra-theme-system {
     display: block;
 }
 
-/* 主页面底部居中的说明按钮 */
+/* Nút giải thích đặt ngay ngắn chóp đáy trang chủ */
 .qr-help-btn-center {
     display: flex !important;
-    margin: 20px auto 0 auto !important; /* 上边距 20px，水平居中 */
+    margin: 20px auto 0 auto !important; /* Lề trên 20px, căn giữa theo chiều ngang */
     justify-content: center;
     align-items: center;
     width: fit-content !important;
@@ -836,7 +836,7 @@ body.qra-theme-system {
 
 .qrq-whitelist-list {
     flex: 1;
-    background: transparent; /* 透出面板背景 */
+    background: transparent; /* Chừa chỗ cho nền bảng hắt qua */
     border: 1px solid var(--qp-border);
     border-radius: var(--qp-radius-sm);
     overflow-y: auto;
@@ -845,7 +845,7 @@ body.qra-theme-system {
     max-height: 360px;
 }
 
-/* 滚动条复用变量 */
+/* Sài lại các biến cho thanh cuộn */
 .qrq-whitelist-list::-webkit-scrollbar { width: 5px; }
 .qrq-whitelist-list::-webkit-scrollbar-thumb {
     background-color: transparent;
@@ -870,14 +870,14 @@ body.qra-theme-system {
 
     display: flex;
     align-items: center;
-    gap: 8px; /* 图标与文字间距 */
+    gap: 8px; /* Khoảng hở giữa biểu tượng và chữ */
 }
 
-/* 图标样式微调 */
+/* Cân chỉnh nhẹ dáng biểu tượng */
 .qrq-whitelist-item i {
     font-size: 0.9em;
     opacity: 0.7;
-    width: 16px; /* 固定宽度确保对齐 */
+    width: 16px; /* Đóng cứng độ rộng để giữ hàng thẳng lối */
     text-align: center;
 }
 
@@ -887,10 +887,10 @@ body.qra-theme-system {
 }
 
 /* ===========================================================
-   8. 设置面板 Tab 样式 - iOS 滑动风格
+   8. Thể loại thẻ Tab cho Bảng thiết lập - Chuẩn trượt kiểu iOS
    =========================================================== */
 .qr-settings-tab-bar {
-    position: relative; /* 关键：作为滑块的定位基准 */
+    position: relative; /* Cốt tủy: Trở thành mốc định vị cho con trượt */
     display: flex;
     border-radius: 20px;
     padding: 4px;
@@ -901,19 +901,19 @@ body.qra-theme-system {
     z-index: 1;
 }
 
-/* 滑块元素 */
+/* Thành phần con trượt */
 .qr-tab-glider {
     position: absolute;
     top: 4px;
     left: 0;
     height: calc(100% - 8px);
-    background-color: var(--SmartThemeQuoteColor, #666); /* 激活色 */
+    background-color: var(--SmartThemeQuoteColor, #666); /* Màu kích hoạt */
     border-radius: 16px;
-    z-index: 1; /* 位于文字下方 */
+    z-index: 1; /* Nằm chìm dưới hàng chữ */
     transition: transform 0.3s cubic-bezier(0.25, 0.1, 0.25, 1),
-                width 0.3s cubic-bezier(0.25, 0.1, 0.25, 1); /* iOS 弹性曲线 */
+                width 0.3s cubic-bezier(0.25, 0.1, 0.25, 1); /* Đường cong đàn hồi theo chuẩn iOS */
     box-shadow: 0 2px 6px rgba(0,0,0,0.2);
-    pointer-events: none; /* 防止遮挡点击 */
+    pointer-events: none; /* Né việc cản trở cú nhấp chuột */
 }
 
 .qr-settings-tab-item {
@@ -928,8 +928,8 @@ body.qra-theme-system {
     white-space: nowrap;
     user-select: none;
     position: relative;
-    z-index: 2; /* 关键：位于滑块上方 */
-    background-color: transparent !important; /* 强制透明，由滑块负责背景 */
+    z-index: 2; /* Cốt tủy: Gác trên lưng con trượt */
+    background-color: transparent !important; /* Ép trong vắt, nhường sân khấu màu nền cho con trượt gánh */
 }
 
 .qr-settings-tab-item:hover {
@@ -958,12 +958,12 @@ body.qra-theme-system {
 }
 
 /* ===========================================================
-   9. Tooltip 样式
+   9. Kiểu dáng Tooltip (Bảng chú giải)
    =========================================================== */
 #qr-tooltip {
     position: fixed;
     z-index: 10000;
-    /* 使用变量适配主题 */
+    /* Rước biến vào để khớp chủ đề */
     background: var(--qp-bg);
     border: 1px solid var(--qp-border);
     box-shadow: var(--qp-shadow);
@@ -985,10 +985,10 @@ body.qra-theme-system {
 }
 
 /* ===========================================================
-   10. 图标设置页新布局 (Icon Settings Refactor)
+   10. Khung cảnh mới cho trang chỉnh Biểu tượng (Cấu trúc lại Icon Settings)
    =========================================================== */
 
-/* 上下结构布局容器 */
+/* Thùng chứa xếp lớp trên dưới */
 .qr-icon-settings-layout {
     display: flex;
     flex-direction: column;
@@ -998,7 +998,7 @@ body.qra-theme-system {
     border: 1px solid var(--smart-theme-border, rgba(255,255,255,0.1));
 }
 
-/* 顶部切换栏 */
+/* Thanh lật trang trên đỉnh */
 .qr-icon-top-bar {
     display: flex;
     align-items: center;
@@ -1007,11 +1007,11 @@ body.qra-theme-system {
     border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 }
 
-/* 内容区 */
+/* Vùng chứa ruột */
 .qr-icon-content {
     flex: 1;
     position: relative;
-    min-height: 200px; /* 保证高度 */
+    min-height: 200px; /* Bảo chứng chiều cao */
 }
 
 .qr-icon-panel {
@@ -1025,7 +1025,7 @@ body.qra-theme-system {
     display: flex;
 }
 
-/* 预览区域 */
+/* Bãi đáp xem trước */
 .qr-icon-preview-box {
     flex: 1;
     border-radius: 8px;
@@ -1054,7 +1054,7 @@ body.qra-theme-system {
     pointer-events: none;
 }
 
-/* 操作按钮组 */
+/* Ổ nút bấm thao tác */
 .qr-icon-actions {
     display: flex;
     gap: 10px;
@@ -1065,7 +1065,7 @@ body.qra-theme-system {
     flex: 1;
 }
 
-/* 图床链接 */
+/* Dây nối sang bãi chứa ảnh (Image Host) */
 .qr-upload-link {
     margin-left: auto;
     font-size: 0.9em;
@@ -1079,13 +1079,13 @@ body.qra-theme-system {
 .qr-upload-link:hover { text-decoration: underline; }
 
 /* ===========================================================
-   11. 模态弹窗样式 (Modals)
+   11. Chỉnh hình Dáng Bảng Bật Modal
    =========================================================== */
 .qr-modal-overlay {
     position: fixed;
     top: 0; left: 0; width: 100vw; height: 100vh;
     background: rgba(0,0,0,0.6);
-    z-index: 99999; /* 确保在所有 ST 元素之上 */
+    z-index: 99999; /* Đảm bảo ngự chóp trên mọi thẻ ST khác */
     display: none;
     align-items: center;
     justify-content: center;
@@ -1115,7 +1115,7 @@ body.qra-theme-system {
     color: #000000;
 }
 
-/* 管理列表 */
+/* Danh mục bộ chỉ huy (Management list) */
 .qr-manage-list {
     max-height: 300px;
     overflow-y: auto;
@@ -1166,7 +1166,7 @@ body.qra-theme-system {
 .qr-icon-btn:hover { color: #333; }
 .qr-icon-btn.delete:hover { color: #ff6b6b; }
 
-/* 输入组 */
+/* Khay đổ chữ */
 .qr-input-group {
     display: flex;
     flex-direction: column;
@@ -1174,7 +1174,7 @@ body.qra-theme-system {
 }
 .qr-input-group label { font-size: 0.9em; opacity: 0.8; }
 
-/* 更新提示文本 */
+/* Văn bản mách nước việc Cập Nhật */
 .qr-update-tip {
     font-size: 0.85em;
     color: #888;
@@ -1185,21 +1185,21 @@ body.qra-theme-system {
     border-radius: 4px;
 }
 
-/* 弹窗底部按钮栏 */
+/* Thanh vác nút bấm chìm đáy Modal */
 .qr-modal-footer {
     display: flex;
-    justify-content: center; /* 水平居中 */
+    justify-content: center; /* Cân chính giữa chiều ngang */
     gap: 10px;
     margin-top: 15px;
 }
 
 .qr-modal-footer .menu_button {
-    width: auto !important; /* 强制自适应宽度 */
+    width: auto !important; /* Cưỡng chế bung rộng theo nội dung */
     flex: 0 0 auto;
     min-width: 80px;
 }
 
-/* 强制适配白色弹窗内的输入框样式 */
+/* Bắt nẹp đồng điệu mui chữ của Modal màu Trắng */
 .qr-modal-box .text_pole {
     background-color: #ffffff !important;
     color: #333 !important;
@@ -1211,12 +1211,12 @@ body.qra-theme-system {
     background-color: #fff !important;
 }
 
-/* 适配上传链接颜色 */
+/* Áp sát màu đường dẫn đăng tải */
 .qr-upload-link {
     color: #1976d2;
 }
 
-/* 适配新增图标时的预览框 */
+/* Chỉnh cho vừa khung ngó thử lúc nạp Icon mới */
 .qr-modal-box .qr-icon-preview-box {
     border: 1px dashed #cccccc;
     color: #333;
@@ -1227,7 +1227,7 @@ body.qra-theme-system {
 }
 
 /* ===========================================================
-   12. 现代化设置卡片样式 (New Settings UI)
+   12. Kiến trúc Thẻ Cài Đặt thời thượng (Giao diện Cài Đặt Mới)
    =========================================================== */
 
 .qr-setting-card {
@@ -1267,7 +1267,7 @@ body.qra-theme-system {
     line-height: 1.2;
 }
 
-/* Toggle Switch (开关) */
+/* Công tắc chuyển đổi */
 .qr-toggle {
     position: relative;
     display: inline-block;
@@ -1286,7 +1286,7 @@ body.qra-theme-system {
     position: absolute;
     cursor: pointer;
     top: 0; left: 0; right: 0; bottom: 0;
-    background-color: var(--color-gray-300); /* 未激活底色 */
+    background-color: var(--color-gray-300); /* Màu nền câm (chưa kích hoạt) */
     transition: .3s;
     border-radius: 22px;
 }
@@ -1304,7 +1304,7 @@ body.qra-theme-system {
 }
 
 .qr-toggle input:checked + .qr-slider {
-    background-color: var(--SmartThemeQuoteColor); /* 激活色跟随主题 */
+    background-color: var(--SmartThemeQuoteColor); /* Màu bật sáng chạy theo Theme */
 }
 
 .qr-toggle input:checked + .qr-slider:before {
@@ -1336,7 +1336,7 @@ body.qra-theme-system {
     margin-top: 5px;
 }
 
-/* Card Button (卡片内按钮) */
+/* Nút ấn nhốt trong Khung Thẻ */
 .qr-card-btn {
     background: transparent;
     border: 1px solid var(--SmartThemeQuoteColor);
@@ -1358,18 +1358,18 @@ body.qra-theme-system {
 }
 
 /* ===========================================================
-   13. 更新检测 UI 样式
+   13. Vóc dáng Giao diện Rà Cập Nhật
    =========================================================== */
 
-/* NEW 徽章 */
+/* Huy hiệu MỚI */
 .qr-new-badge {
-    display: none; /* 默认隐藏 */
+    display: none; /* Ẩn theo mặc định */
     background-color: #ff4444;
     color: white;
     font-size: 0.7em;
     padding: 1px 5px;
     border-radius: 4px;
-    margin-left: 6px; /* 稍微缩小间距 */
+    margin-left: 6px; /* Bóp nhẹ khoảng hở */
     font-weight: bold;
     vertical-align: middle;
     line-height: normal;
@@ -1385,7 +1385,7 @@ body.qra-theme-system {
     100% { box-shadow: 0 0 0 0 rgba(255, 68, 68, 0); }
 }
 
-/* 版本信息行 */
+/* Dãy khai báo Phiên Bản */
 .qr-version-row {
     display: flex;
     justify-content: space-between;
@@ -1397,15 +1397,15 @@ body.qra-theme-system {
     opacity: 0.9;
 }
 
-/* 更新按钮特殊样式 */
+/* Cách điệu lạ mắt cho Nút Nâng Cấp */
 .qr-update-btn {
     font-size: 0.9em !important;
     padding: 4px 12px !important;
     min-width: auto !important;
-    width: auto !important; /* 强制宽度自动 */
+    width: auto !important; /* Bức ép bề rộng nhả tự do */
 }
 
-/* 有更新时的按钮样式 */
+/* Nước sơn của nút khi Bắt được Mẻ Mới */
 .qr-update-btn.has-update {
     color: #ff4444 !important;
     border-color: #ff4444 !important;
@@ -1416,7 +1416,7 @@ body.qra-theme-system {
     color: white !important;
 }
 
-/* 更新日志内容区 */
+/* Gian phòng chứa sổ Nam Tào Cập Nhật */
 .qr-changelog-viewer {
     background: rgba(0,0,0,0.2);
     padding: 15px;
@@ -1430,9 +1430,9 @@ body.qra-theme-system {
     border: 1px solid rgba(255,255,255,0.1);
 }
 
-/* 系统日志查看区 */
+/* Lô cốt đọc bản ghi Hoạt Động Hệ Thống */
 .qr-log-viewer {
-    flex: 1; /* 关键：占满剩余高度 */
+    flex: 1; /* Then chốt: Tràn bờ lấp trọn dải trống còn dư */
     background: #ffffff;
     color: #333;
     padding: 12px;
@@ -1446,14 +1446,14 @@ body.qra-theme-system {
     margin-bottom: 0;
 }
 
-/* 适配暗色模式/不同主题，简单反色处理，或者直接使用固定亮色背景确保日志可读性 */
+/* Liệu chừng với chế độ Màn Đêm/Các Theme dị biệt, nắn màu đảo lộn đơn sơ, hay quất mẹ mảng nền sáng cố định để giữ mạng con chữ Log */
 .qr-modal-box .qr-log-viewer {
-    /* 强制亮色背景以配合目前的日志着色逻辑，防止暗色主题下看不清深色字 */
+    /* Ép phông nền hắt sáng để tông xuyệt tông với lối quét màu Log hiện tại, cản thảm kịch mù tịt chữ đen chìm vô bóng tối */
     background: #fdfdfd;
     color: #222;
 }
 
-/* --- 日志弹窗专用样式重写 --- */
+/* --- Phá bỏ làm mới nét Giao Diện cho riêng Bảng Log --- */
 #qr-assistant-modal-log {
     background-color: #ffffff !important;
     color: #000000 !important;
@@ -1463,27 +1463,27 @@ body.qra-theme-system {
     flex-direction: column;
 }
 
-/* 头部样式：白色背景、底部灰线、Flex布局 */
+/* Giao diện Vòm Đầu: Phông trắng, lằn chỉ xám chẻ đáy, rải bố cục Flex */
 #qr-assistant-modal-log .qr-modal-header {
-    background: #f8f8f8 !important; /*稍微带点灰，区分内容区*/
+    background: #f8f8f8 !important; /* Pha thêm giọt xám tàn tro, kẻ biên ranh giới với gian chứa chữ */
     border-bottom: 1px solid #e0e0e0 !important;
     color: #333 !important;
     padding: 10px 15px !important;
 
-    /* 核心布局修复 */
+    /* Bẻ lại bộ khung sống lưng */
     display: flex !important;
     justify-content: space-between !important;
     align-items: center !important;
     flex-shrink: 0;
 }
 
-/* 头部功能按钮 (复制/下载/清空) */
+/* Nút chức năng trên chóp (Chép khối/Tải file/Tẩy trắng bóc) */
 .qr-log-header-btn {
-    width: auto !important;       /* 宽度自适应 */
-    min-width: unset !important;  /* 取消最小宽度限制 */
+    width: auto !important;       /* Nở ngang tự giãn */
+    min-width: unset !important;  /* Gỡ trói bẻ gãy khóa Min-Width */
     padding: 4px 10px !important;
     font-size: 12px !important;
-    height: 26px !important;      /* 固定高度确保对齐 */
+    height: 26px !important;      /* Neo chặt chiều cao giữ đều hàng lối */
     line-height: normal !important;
 
     background: #fff !important;
@@ -1499,7 +1499,7 @@ body.qra-theme-system {
     border-color: #bbb !important;
 }
 
-/* 关闭按钮颜色适配 */
+/* Phết lại màu Nút Sập cho đồng điệu */
 #qr-assistant-modal-log .qr-help-close-btn {
     color: #666 !important;
     background: transparent !important;
@@ -1513,42 +1513,42 @@ body.qra-theme-system {
     color: #000 !important;
 }
 
-/* 日志查看区：纯白背景 */
+/* Sân Bãi soi Log: Nền trắng bóc vẹn nguyên */
 #qr-assistant-modal-log .qr-log-viewer {
     margin: 0 !important;
     border: none !important;
     border-radius: 0 !important;
     background: #ffffff !important;
-    flex: 1; /* 填满剩余高度 */
+    flex: 1; /* Nhồi phồng lấp đầy độ cao còn trống */
 }
 
 /* ===========================================================
-   14. 帮助弹窗专用样式 (Help Modal)
+   14. Áo khoác thiết kế đo ni đóng giày cho Bảng Cứu Viện (Help Modal)
    =========================================================== */
 
-/* 调整弹窗容器大小 */
+/* Cân đo lại bệ đỡ của Khung Modal */
 .qr-modal-box.qr-help-mode {
     width: 900px;
     max-width: 95vw;
     height: 85vh;
-    padding: 0; /* 清除默认内边距，由内部布局控制 */
-    overflow: hidden; /* 防止外层滚动 */
+    padding: 0; /* Xóa nếp lề trong rập khuôn, phó thác việc đó cho kiến trúc nội bộ */
+    overflow: hidden; /* Phanh chặn bánh xe cuộn tràn ra viền ngoài */
     display: flex;
     flex-direction: column;
 
-    /* 强制保持深色主题以适配内部文档设计 */
+    /* Thít chặt luật ngự trị của tông nền Tối để hợp nhãn với thiết kế văn kiện nấp trong bụng */
     background: #202020;
     border: 1px solid #444;
     color: #fff;
 }
 
-/* 修复 Help Header 在深色模式下的边框和文字颜色 */
+/* Chữa cháy màu viền và nét mực cho Đầu Đội Help giữa đêm Tối */
 .qr-modal-box.qr-help-mode .qr-help-header {
     border-bottom: 1px solid rgba(255,255,255,0.1);
     color: #fff;
 }
 
-/* 弹窗头部 */
+/* Nóc sọ Bảng bật */
 .qr-help-header {
     padding: 15px 20px;
     border-bottom: 1px solid var(--smart-theme-border, rgba(255,255,255,0.1));
@@ -1561,16 +1561,16 @@ body.qra-theme-system {
     flex-shrink: 0;
 }
 
-/* 头部左侧区域（收缩按钮 + 标题） */
+/* Góc trái của Nóc sọ (Cò bấm co rút + Tên bảng) */
 .qr-help-header-left {
     display: flex;
     align-items: center;
     gap: 10px;
 }
 
-/* 侧边栏收缩/展开按钮 */
+/* Cò bấm Sập/Tung dải rèm cánh Hông */
 .qr-help-sidebar-toggle {
-    display: none; /* 仅在移动端显示 */
+    display: none; /* Chỉ phô diễn hình hài trên thiết bị Cầm Tay */
     background: transparent;
     border: none;
     color: var(--smart-theme-body-color, #fff);
@@ -1593,7 +1593,7 @@ body.qra-theme-system {
 }
 .qr-help-close-btn:hover { opacity: 1; }
 
-/* 顶部视频容器 */
+/* Boong chứa Thước Phim vắt ngất ngưởng trên chóp */
 .qr-help-video-container {
     flex-shrink: 0;
     background: #000;
@@ -1605,21 +1605,21 @@ body.qra-theme-system {
 
 .qr-help-video-container video {
     max-width: 100%;
-    max-height: 250px; /* 限制高度，留出空间给文字 */
+    max-height: 250px; /* Cắm khóa chặn độ cao, lách chỗ hở cho con chữ nảy mầm */
     outline: none;
     border-radius: 4px;
     box-shadow: 0 4px 10px rgba(0,0,0,0.3);
 }
 
-/* 下方双栏布局容器 */
+/* Bộ sườn gánh vác hai cột song song phía đáy */
 .qr-help-split-layout {
     display: flex;
     flex: 1;
-    overflow: hidden; /* 关键：内部滚动 */
+    overflow: hidden; /* Điểm tử huyệt: Bánh xe lăn tại nội hàm */
     background: rgba(0,0,0,0.05);
 }
 
-/* 左侧侧边栏 */
+/* Dải sườn che cánh tả */
 .qr-help-sidebar {
     width: 200px;
     flex-shrink: 0;
@@ -1657,23 +1657,23 @@ body.qra-theme-system {
     opacity: 1;
 }
 
-/* 缩进显示的子项 */
+/* Dòng đàn em nằm nép lùi vô xó */
 .qr-toc-item.sub {
     margin-left: 10px;
     font-size: 12px;
 }
 
-/* 右侧正文区域 */
+/* Bãi đất rộng vung chữ bên cánh Hữu */
 .qr-help-content {
     flex: 1;
     padding: 25px 30px;
     overflow-y: auto;
-    scroll-behavior: smooth; /* 平滑滚动 */
+    scroll-behavior: smooth; /* Trượt êm ru mượt mà */
     line-height: 1.6;
     color: var(--smart-theme-body-color, #eee);
 }
 
-/* 正文排版优化 */
+/* Chuốt lại nét nặn chữ nghĩa phần Thân Dài */
 .qr-help-content h2 {
     font-size: 1.5em;
     margin-top: 5px;
@@ -1682,7 +1682,7 @@ body.qra-theme-system {
     border-bottom: 1px solid rgba(255,255,255,0.1);
     color: var(--SmartThemeQuoteColor, #fff);
 }
-/* 非首个H2增加间距 */
+/* Thẻ H2 nào không phải Trưởng Nam thì bị dãn khoảng nới rộng ra */
 .qr-help-content h2:not(:first-child) { margin-top: 40px; }
 
 .qr-help-content h3 {
@@ -1729,23 +1729,23 @@ body.qra-theme-system {
 }
 
 /* ===========================================================
-   15. 移动端适配 (Mobile Responsiveness)
+   15. Tương thích thiết bị di động
    =========================================================== */
 
-/* 针对屏幕宽度小于 768px (平板/手机) 的设备调整帮助弹窗布局 */
+/* Nắn bóp lại Cấu Trúc Khung Trợ Giúp để vừa vặn loại mặt kính còi hẹp hơn 768px (Máy tính bảng/Điện thoại) */
 @media (max-width: 768px) {
-    /* 1. 显示侧边栏收缩按钮 */
+    /* 1. Khai quang chốt bấm rút gọn Thanh Hông */
     .qr-help-sidebar-toggle {
         display: block;
     }
 
-    /* 2. 双栏布局保持水平方向，侧边栏通过定位滑出 */
+    /* 2. Bố cục Hai Trụ cứ nằm lì Phương Ngang, dải viền bên mượn Trọng Lực để trườn ra */
     .qr-help-split-layout {
         flex-direction: row;
         position: relative;
     }
 
-    /* 3. 侧边栏：默认隐藏在左侧外部，展开时滑入 */
+    /* 3. Trụ Viền Cạnh: Nằm ngoan câm nín lấp ngoài ranh Giới Trái, tới hồi bung lụa mới miết vào */
     .qr-help-sidebar {
         position: absolute;
         top: 0;
@@ -1760,13 +1760,13 @@ body.qra-theme-system {
         box-shadow: none;
     }
 
-    /* 4. 侧边栏展开状态 */
+    /* 4. Trạng thái tung hoành của Trụ Viền */
     .qr-help-split-layout.qr-sidebar-open .qr-help-sidebar {
         transform: translateX(0);
         box-shadow: 4px 0 15px rgba(0,0,0,0.3);
     }
 
-    /* 5. 侧边栏展开时的遮罩层效果（通过伪元素实现） */
+    /* 5. Tấm lưới Mờ che trùm lúc Dải Viền bung trướng (Mượn hồn ma Pseudo-element để yểm) */
     .qr-help-split-layout.qr-sidebar-open::after {
         content: '';
         position: absolute;
@@ -1778,18 +1778,18 @@ body.qra-theme-system {
         z-index: 5;
     }
 
-    /* 6. 内容区占满宽度 */
+    /* 6. Lãnh địa Nội Dung bành trướng kịch trần bề ngang */
     .qr-help-content {
         padding: 15px;
     }
 
-    /* 7. 优化目录项显示 */
+    /* 7. Dũa lại bộ áo của đám Thẻ Thư Mục */
     .qr-toc-item {
         padding: 10px 14px;
         font-size: 13px;
     }
 
-    /* 8. 调整弹窗头部高度 */
+    /* 8. Vặn chỉnh bề dày cho Vòm Đỉnh Bảng Bật */
     .qr-help-header {
         padding: 10px 15px;
         font-size: 16px;
@@ -1797,7 +1797,7 @@ body.qra-theme-system {
 }
 
 /* ===========================================================
-   16. 白名单说明区域样式 (Whitelist Help Box)
+   16. Y phục Cụm Chữ Nghĩa Cắt Nghĩa Danh Sách Trắng
    =========================================================== */
 .qr-whitelist-help-box {
     margin-top: 15px;
@@ -1822,7 +1822,7 @@ body.qra-theme-system {
 }
 
 /* =================================================================
-   17. 主题：少女风 (Theme Cute)
+   17. Bộ Cánh: Gió Thiếu Nữ (Theme Sakura/Cute)
    ================================================================= */
 body.theme-cute {
     --qp-bg: rgba(255, 250, 252, 0.9);
@@ -1841,12 +1841,12 @@ body.theme-cute {
     --qp-item-margin: 8px;
 }
 
-/* Cute 专属：容器边框加强 */
+/* Luật riêng mâm Cute: Bo cứng cáp nẹp lề Bộ Chứa */
 body.theme-cute #qr-assistant {
     border: 2px solid var(--qp-border) !important;
 }
 
-/* Cute 专属：按钮样式重写 */
+/* Luật riêng mâm Cute: Nắn lại xương Nút Bấm */
 body.theme-cute .action-item {
     border: 1px solid #ffeef4 !important;
     box-shadow: 0 2px 6px rgba(255, 182, 193, 0.1) !important;
@@ -1862,9 +1862,9 @@ body.theme-cute .action-item:hover {
     color: #ff6b8b !important;
 }
 
-/* Cute 专属：分组连接处处理 (已移除，使用通用无缝逻辑以消除横线) */
+/* Luật riêng mâm Cute: Xử lý khớp nối Phân Đàn (Đã lột bỏ, nhờn logic Trơn Tru Liên Mạch để cạo sạch Vệt Ngang) */
 
-/* Cute 专属：伪元素装饰 (左侧小爱心/圆点) */
+/* Luật riêng mâm Cute: Treo mác ảo Pseudo (Tim nhí/Hạt châu kề mép Trái) */
 body.theme-cute .action-item::before {
     content: '';
     position: absolute;
@@ -1884,7 +1884,7 @@ body.theme-cute .action-item:hover::before {
     transform: scale(1);
 }
 
-/* 当有装饰点时，文字稍微右移 */
+/* Lúc có đốm nốt tô son, mảng chữ khẽ lết nhích qua Phải */
 body.theme-cute .action-item:hover span {
     transform: translateX(4px);
     transition: transform 0.3s ease;
@@ -1892,8 +1892,8 @@ body.theme-cute .action-item:hover span {
 }
 
 /* =================================================================
-   18. 主题：古典风 (Theme Classical)
-   Colors: #C96342 (朱砂), #FAF9F5 (宣纸), #F0EEE6 (云峰)
+   18. Bộ Cánh: Hồn Cổ Điển (Theme Classical)
+   Mã Màu: #C96342 (Chu Sa), #FAF9F5 (Giấy Xuyến Chỉ), #F0EEE6 (Đỉnh Mây)
    ================================================================= */
 body.theme-classical {
     --qp-bg: #FAF9F5;
@@ -1911,24 +1911,24 @@ body.theme-classical {
     --qp-radius-sm: 3px;
     --qp-item-margin: 5px;
 
-    /* 尝试使用衬线体，如果系统没有则回退 */
+    /* Rướn xài Phông Chữ có Chân (Serif), lỡ như Bộ Máy nghèo nàn thì lùi bước */
     --qp-font-family: "Georgia", "Kaiti SC", "STKaiti", "KaiTi", serif;
 }
 
-/* Classical 专属：容器双层边框质感 */
+/* Luật riêng mâm Cổ Điển: Tôn vinh bề mặt Nẹp Đôi của Khuôn Bọc */
 body.theme-classical #qr-assistant {
     border: 1px solid #dcd8cc !important;
     box-shadow: 0 10px 30px rgba(78, 52, 46, 0.15) !important;
 }
 
-/* Classical 专属：按钮设计 */
+/* Luật riêng mâm Cổ Điển: Gọt đẽo Dáng Nút */
 body.theme-classical .action-item {
     border: 1px solid transparent !important;
     border-left: 3px solid rgba(0,0,0,0.05) !important;
     padding-left: 20px !important;
     padding-right: 20px !important;
     letter-spacing: 0.5px !important;
-    /* 古典风不需要圆角 */
+    /* Khí chất Cổ Thượng chả thiết tha gì góc Tròn vo */
     border-radius: 2px !important;
 }
 
@@ -1948,14 +1948,14 @@ body.theme-classical .action-item:active {
     transform: translateX(1px) !important;
 }
 
-/* 头部样式微调 */
+/* Xếp nắn mượt Vòm Nóc */
 body.theme-classical #qr-assistant-onboarding-header {
     border-bottom: 1px double #dcd8cc !important;
     background: linear-gradient(to bottom, #FAF9F5, #F0EEE6) !important;
 }
 
 /* =================================================================
-   19. 排序管理弹窗样式 (Drag & Drop UI)
+   19. Dàn áo Bảng Cai Quản Sắp Hàng (Giao diện Kéo & Thả)
    ================================================================= */
 
 .qr-sort-columns-container {
@@ -1995,7 +1995,7 @@ body.theme-classical #qr-assistant-onboarding-header {
     gap: 8px;
 }
 
-/* 分组容器 */
+/* Hộp chứa Tổ Đội */
 .qr-sort-group {
     background: #ffffff;
     border: 1px solid #d0d0d0;
@@ -2012,7 +2012,7 @@ body.theme-classical #qr-assistant-onboarding-header {
     border-style: dashed;
 }
 
-/* 分组头部 */
+/* Nóc sọ Tổ Đội */
 .qr-sort-group-header {
     padding: 10px 12px;
     background: #f8f9fa;
@@ -2023,7 +2023,7 @@ body.theme-classical #qr-assistant-onboarding-header {
     cursor: grab;
     user-select: none;
 
-    /* 告诉移动端浏览器：在这个元素上滑动别触发滚动 */
+    /* Hô to với trình duyệt Di Động: Quẹt quẹt chạm chạm trên vật này thì Rút Lệnh Cuộn Nền ngay đi */
     touch-action: none;
 }
 
@@ -2031,7 +2031,7 @@ body.theme-classical #qr-assistant-onboarding-header {
     cursor: grabbing;
 }
 
-/* 拖拽把手 */
+/* Gọng Cầm để Kéo Lôi */
 .qr-sort-drag-handle {
     color: #999;
     margin-right: 8px;
@@ -2041,14 +2041,14 @@ body.theme-classical #qr-assistant-onboarding-header {
     cursor: grabbing;
 }
 
-/* 分组名称 */
+/* Hỗn danh của Tổ Đội */
 .qr-sort-group-header > div span {
     font-weight: bold;
     font-size: 13px;
     color: #333;
 }
 
-/* 按钮数量标签 */
+/* Thẻ Gắn đếm đầu Nút */
 .qr-sort-item-count {
     background: #e3f2fd;
     color: #2196f3;
@@ -2058,7 +2058,7 @@ body.theme-classical #qr-assistant-onboarding-header {
     margin-left: 6px;
 }
 
-/* 幽灵分组标签 */
+/* Dấu triện bùa cho Nhóm Ma Nháp */
 .qr-sort-tag-ghost {
     font-size: 10px;
     color: #ff9800;
@@ -2069,7 +2069,7 @@ body.theme-classical #qr-assistant-onboarding-header {
     white-space: nowrap;
 }
 
-/* 操作按钮组 */
+/* Ổ nút bóp Mệnh Lệnh */
 .qr-sort-group-header button {
     background: transparent;
     border: none;
@@ -2092,7 +2092,7 @@ body.theme-classical #qr-assistant-onboarding-header {
     color: #666;
 }
 
-/* 分组内容区 */
+/* Lãnh địa Tạng Ruột Tổ Đội */
 .qr-sort-group-content {
     padding: 8px;
     background: #fafafa;
@@ -2132,7 +2132,7 @@ body.theme-classical #qr-assistant-onboarding-header {
     margin-left: 8px;
 }
 
-/* 拖拽进行中 (原位置变为占位符) */
+/* Khúc Lôi Kéo Đang Cuốn (Chỗ Gốc Trơ Ra Lỗ Hổng) */
 .qr-sort-group.dragging {
     opacity: 0.4;
     background: #f0f0f0;
@@ -2140,21 +2140,21 @@ body.theme-classical #qr-assistant-onboarding-header {
     box-shadow: none;
 }
 
-/* 隐藏占位符内部的文字，使其看起来像一个纯粹的坑位 */
+/* Tẩy xóa chữ giấu nhẹm vào thân Hố Trống, cho nó toát lên nét Đất Trống Chờ Lấp */
 .qr-sort-group.dragging * {
     visibility: hidden;
 }
 
-/* 跟随手指的克隆体样式 */
+/* Bộ da của Hồn Ma Phân Thân đu bám ngón tay */
 .qr-sort-drag-clone {
     position: fixed !important;
     z-index: 100000 !important;
     opacity: 0.95;
     background: #ffffff !important;
     box-shadow: 0 10px 25px rgba(0,0,0,0.2) !important;
-    pointer-events: none !important; /* 核心：让探针穿透它，获取底层元素 */
+    pointer-events: none !important; /* Cốt tủy: Trổ lổ thủng cho Đầu Dò phi lọt qua, bóc nắn mồi chìm sâu bên dưới */
     border: 1px solid #2196f3 !important;
     border-radius: 4px;
     margin: 0 !important;
-    transition: none !important; /* 禁用动画以跟紧手指 */
+    transition: none !important; /* Đoạn tuyệt Trò Múa Rối để bám dính lấy Đầu Ngón Tay */
 }

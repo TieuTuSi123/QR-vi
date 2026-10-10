@@ -9,7 +9,7 @@ import { Logger, LogLevel, LogCategory } from './logger.js';
 import { translate, getCurrentLocale } from '../../../i18n.js';
 import { helpDocs, announcementDocs } from './dict.js';
 
-// 同步原版 Quick Reply v2 "合并按钮" 开关状态到我们的面板
+// Đồng bộ trạng thái công tắc "Gộp nút" (Combined buttons) của Quick Reply v2 gốc vào bảng điều khiển của chúng ta
 export function syncCombinedCheckbox() {
     const combinedCheck = document.getElementById(Constants.ID_COMBINED_BUTTONS_CHECKBOX);
     if (combinedCheck && window.quickReplyApi && window.quickReplyApi.settings) {
@@ -17,7 +17,7 @@ export function syncCombinedCheckbox() {
     }
 }
 
-// --- 自动伸缩 CSS 注入逻辑 ---
+// --- Logic chèn CSS tự động thu gọn ---
 function injectAutoShrinkStyle() {
     if (document.getElementById(Constants.ID_AUTO_SHRINK_STYLE_TAG)) return;
     const style = document.createElement('style');
@@ -40,13 +40,13 @@ function removeAutoShrinkStyle() {
     if (style) style.remove();
 }
 
-// 导出滑块定位函数，供 index.js 在面板打开时调用
+// Xuất hàm định vị thanh trượt, để index.js gọi khi mở bảng điều khiển
 export function updateTabGliderState() {
     const tabBar = document.getElementById(Constants.ID_SETTINGS_TAB_BAR);
     const activeTab = tabBar?.querySelector('.qr-settings-tab-item.active');
     const glider = tabBar?.querySelector('.qr-tab-glider');
 
-    // 仅当 Tab 存在且可见（宽度大于0）时计算，防止初始化隐藏时计算为 0
+    // Chỉ tính toán khi Tab tồn tại và hiển thị (chiều rộng > 0), tránh việc khởi tạo bị ẩn tính bằng 0
     if (activeTab && glider && activeTab.offsetWidth > 0) {
         glider.style.width = `${activeTab.offsetWidth}px`;
         glider.style.transform = `translateX(${activeTab.offsetLeft}px)`;
@@ -63,19 +63,19 @@ export function updateIconDisplay() {
     const iconType = settings.iconType || Constants.ICON_TYPES.STAR;
     const customIconUrl = settings.customIconUrl || '';
     const faIconCode = settings.faIconCode || '';
-    const sizeMode = settings.builtinIconSize || 'match'; // 内置图标大小模式
+    const sizeMode = settings.builtinIconSize || 'match'; // Chế độ kích thước biểu tượng tích hợp
 
-    // 1. 清理旧样式
+    // 1. Dọn dẹp kiểu cũ
     button.innerHTML = '';
     button.removeAttribute('style');
     button.className = '';
 
-    // 2. 基础类名适配
+    // 2. Thích ứng tên lớp cơ sở
     const sendBtn = document.getElementById('send_but');
     if (sendBtn && sendBtn.classList.contains('primary-button')) button.classList.add('primary-button');
     else button.classList.add('secondary-button');
 
-    // 3. 渲染图标内容
+    // 3. Hiển thị nội dung biểu tượng
     let myIconElement = null;
 
     if (iconType === Constants.ICON_TYPES.CUSTOM && customIconUrl) {
@@ -83,13 +83,13 @@ export function updateIconDisplay() {
         img.src = customIconUrl;
         img.alt = "icon";
 
-        // 查找当前图标对应的配置以获取：
+        // Tìm cấu hình tương ứng với biểu tượng hiện tại để lấy:
         const savedCustomIcons = settings.savedCustomIcons || [];
         const currentIconConfig = savedCustomIcons.find(icon => icon.url === customIconUrl);
-        // 如果找到了配置且有size字段则使用，否则默认1.2
+        // Nếu tìm thấy cấu hình và có trường size thì sử dụng, nếu không mặc định 1.2
         const iconSize = (currentIconConfig && currentIconConfig.size) ? currentIconConfig.size : '1.2';
 
-        // 始终使用相对单位 em，使其随按钮字体大小自适应
+        // Luôn sử dụng đơn vị tương đối em, để nó tự thích ứng theo cỡ chữ của nút
         img.style.height = iconSize + 'em';
         img.style.width = 'auto';
         img.style.verticalAlign = 'middle';
@@ -120,16 +120,16 @@ export function updateIconDisplay() {
     } else {
         const iconClass = Constants.ICON_CLASS_MAP[iconType] || Constants.ICON_CLASS_MAP[Constants.ICON_TYPES.STAR];
 
-        // 计算最终字号
+        // Tính toán cỡ chữ cuối cùng
         let finalFontSize;
         if (sizeMode === 'match') {
-            finalFontSize = 'inherit'; // 与发送按钮保持一致
+            finalFontSize = 'inherit'; // Giữ nguyên cùng với nút gửi
         } else {
             const numVal = parseFloat(sizeMode);
             if (!isNaN(numVal) && numVal > 0) {
                 finalFontSize = `${sizeMode}em`;
             } else {
-                finalFontSize = 'inherit'; // 无效值回退
+                finalFontSize = 'inherit'; // Giá trị không hợp lệ, dự phòng
             }
         }
 
@@ -137,7 +137,7 @@ export function updateIconDisplay() {
         myIconElement = button.querySelector('i');
     }
 
-    // 4. 深度样式同步 (完全自适应)
+    // 4. Đồng bộ kiểu sâu (Hoàn toàn tự thích ứng)
     if (sendBtn) {
         const sendBtnComputed = window.getComputedStyle(sendBtn);
 
@@ -146,7 +146,7 @@ export function updateIconDisplay() {
         button.style.justifyContent = 'center';
         button.style.color = sendBtnComputed.color;
         button.style.cursor = sendBtnComputed.cursor;
-        button.style.fontSize = sendBtnComputed.fontSize; // 同步原生字号
+        button.style.fontSize = sendBtnComputed.fontSize; // Đồng bộ cỡ chữ gốc
 
         const innerIcon = sendBtn.querySelector('i');
         const sourceElement = innerIcon || sendBtn;
@@ -157,7 +157,7 @@ export function updateIconDisplay() {
             myIconElement.style.paddingBottom = sourceComputed.paddingBottom;
             myIconElement.style.marginTop = sourceComputed.marginTop;
 
-            // 仅在"与发送按钮保持一致"模式下才同步图标字号；自定义大小模式下不覆盖
+            // Chỉ trong chế độ "Giữ nguyên cùng nút gửi" thì mới đồng bộ cỡ chữ; chế độ tùy chỉnh thì không ghi đè
             if (sizeMode === 'match' && sourceComputed.fontSize !== sendBtnComputed.fontSize) {
                  myIconElement.style.fontSize = sourceComputed.fontSize;
                  button.style.fontSize = 'inherit';
@@ -166,79 +166,79 @@ export function updateIconDisplay() {
     }
 }
 
-// 设置面板 HTML
+// HTML Bảng Cài đặt
 export function createSettingsHtml() {
     return `
     <div id="${Constants.ID_SETTINGS_CONTAINER}" class="extension-settings">
         <div class="inline-drawer">
             <div class="inline-drawer-toggle inline-drawer-header">
                 <div style="display:flex; align-items:center;">
-                    <b data-i18n="qra_plugin_name">QR助手</b>
+                    <b data-i18n="qra_plugin_name">QR Assistant</b>
                     <span id="${Constants.ID_NEW_VERSION_BADGE}" class="qr-new-badge">NEW</span>
                 </div>
                 <div class="inline-drawer-icon fa-solid fa-circle-chevron-down"></div>
             </div>
             <div class="inline-drawer-content">
 
-                <!-- 菜单栏 -->
+                <!-- Thanh Menu -->
                 <div id="${Constants.ID_SETTINGS_TAB_BAR}" class="qr-settings-tab-bar">
-                    <!-- 滑块元素 -->
+                    <!-- Phần tử con chạy (Slider) -->
                     <div class="qr-tab-glider"></div>
 
                     <div class="qr-settings-tab-item active" data-tab="${Constants.ID_PAGE_MAIN}" id="${Constants.ID_TAB_MAIN}">
-                        <i class="fa-solid fa-cog"></i> <span data-i18n="qra_tab_main">主设置</span>
+                        <i class="fa-solid fa-cog"></i> <span data-i18n="qra_tab_main">Cài đặt chính</span>
                     </div>
                     <div class="qr-settings-tab-item" data-tab="${Constants.ID_PAGE_WHITELIST}" id="${Constants.ID_TAB_WHITELIST}">
-                        <i class="fa-solid fa-list-check"></i> <span data-i18n="qra_tab_whitelist">白名单</span>
+                        <i class="fa-solid fa-list-check"></i> <span data-i18n="qra_tab_whitelist">Danh sách trắng</span>
                     </div>
                     <div class="qr-settings-tab-item" data-tab="${Constants.ID_PAGE_ICON}" id="${Constants.ID_TAB_ICON}">
-                        <i class="fa-solid fa-icons"></i> <span data-i18n="qra_tab_icon">按钮图标</span>
+                        <i class="fa-solid fa-icons"></i> <span data-i18n="qra_tab_icon">Biểu tượng nút</span>
                     </div>
                 </div>
 
-                <!-- 1. 主设置页面 -->
+                <!-- 1. Trang Cài đặt chính -->
                 <div id="${Constants.ID_PAGE_MAIN}" class="qr-settings-page active">
-                    <!-- 版本检测行 -->
+                    <!-- Dòng kiểm tra phiên bản -->
                     <div class="qr-version-row">
-                        <span><span data-i18n="qra_label_current_version">当前版本:</span> <span id="${Constants.ID_VERSION_DISPLAY}">...</span></span>
-                        <button id="${Constants.ID_BTN_CHECK_UPDATE}" class="menu_button qr-update-btn"><span data-i18n="qra_btn_check_update">检查更新</span></button>
+                        <span><span data-i18n="qra_label_current_version">Phiên bản hiện tại:</span> <span id="${Constants.ID_VERSION_DISPLAY}">...</span></span>
+                        <button id="${Constants.ID_BTN_CHECK_UPDATE}" class="menu_button qr-update-btn"><span data-i18n="qra_btn_check_update">Kiểm tra cập nhật</span></button>
                     </div>
 
                     <div class="flex-container flexGap5">
                         <select id="${Constants.ID_SETTINGS_ENABLED_DROPDOWN}" class="text_pole" style="width: 100%;">
-                            <option value="true" data-i18n="qra_opt_enable">启用插件</option>
-                            <option value="false" data-i18n="qra_opt_disable">禁用插件</option>
+                            <option value="true" data-i18n="qra_opt_enable">Bật tiện ích</option>
+                            <option value="false" data-i18n="qra_opt_disable">Tắt tiện ích</option>
                         </select>
                     </div>
 
-                    <!-- UI 主题设置 -->
+                    <!-- Cài đặt chủ đề UI -->
                     <div class="flex-container flexGap5" style="margin-top: 10px; align-items: center;">
-                        <label style="font-weight:bold; min-width: 70px;" data-i18n="qra_label_ui_theme">UI 主题:</label>
+                        <label style="font-weight:bold; min-width: 70px;" data-i18n="qra_label_ui_theme">Chủ đề UI:</label>
                         <select id="${Constants.ID_UI_THEME_DROPDOWN}" class="text_pole" style="flex:1;">
-                            <option value="${Constants.UI_THEMES.LIGHT}" data-i18n="qra_theme_default">默认</option>
-                            <option value="${Constants.UI_THEMES.SYSTEM}" data-i18n="qra_theme_system">跟随酒馆</option>
-                            <option value="${Constants.UI_THEMES.CUTE}" data-i18n="qra_theme_sakura">樱花</option>
-                            <option value="${Constants.UI_THEMES.CLASSICAL}" data-i18n="qra_theme_classical">古典</option>
-                            <option value="${Constants.UI_THEMES.DARK}" data-i18n="qra_theme_dark">暗黑</option>
-                            <option value="${Constants.UI_THEMES.PAPER}" data-i18n="qra_theme_paper">和纸</option>
-                            <option value="${Constants.UI_THEMES.CERAMIC}" data-i18n="qra_theme_ceramic">白瓷</option>
-                            <option value="${Constants.UI_THEMES.LAVENDER}" data-i18n="qra_theme_lavender">薰衣草</option>
-                            <option value="${Constants.UI_THEMES.SMOKED}" data-i18n="qra_theme_smoked">烟熏</option>
-                            <option value="${Constants.UI_THEMES.AURORA}" data-i18n="qra_theme_aurora">极光</option>
-                            <option value="${Constants.UI_THEMES.FOREST}" data-i18n="qra_theme_forest">迷雾森林</option>
+                            <option value="${Constants.UI_THEMES.LIGHT}" data-i18n="qra_theme_default">Mặc định</option>
+                            <option value="${Constants.UI_THEMES.SYSTEM}" data-i18n="qra_theme_system">Theo SillyTavern</option>
+                            <option value="${Constants.UI_THEMES.CUTE}" data-i18n="qra_theme_sakura">Hoa anh đào</option>
+                            <option value="${Constants.UI_THEMES.CLASSICAL}" data-i18n="qra_theme_classical">Cổ điển</option>
+                            <option value="${Constants.UI_THEMES.DARK}" data-i18n="qra_theme_dark">Tối</option>
+                            <option value="${Constants.UI_THEMES.PAPER}" data-i18n="qra_theme_paper">Giấy Washi</option>
+                            <option value="${Constants.UI_THEMES.CERAMIC}" data-i18n="qra_theme_ceramic">Sứ trắng</option>
+                            <option value="${Constants.UI_THEMES.LAVENDER}" data-i18n="qra_theme_lavender">Oải hương</option>
+                            <option value="${Constants.UI_THEMES.SMOKED}" data-i18n="qra_theme_smoked">Khói</option>
+                            <option value="${Constants.UI_THEMES.AURORA}" data-i18n="qra_theme_aurora">Cực quang</option>
+                            <option value="${Constants.UI_THEMES.FOREST}" data-i18n="qra_theme_forest">Rừng sương mù</option>
                         </select>
                     </div>
 
                     <div style="margin-top: 15px; display: flex; flex-direction: column; gap: 2px;">
 
-                        <!-- 自动伸缩卡片 -->
+                        <!-- Thẻ Tự động thu gọn -->
                         <div class="qr-setting-card">
                             <div class="qr-setting-text">
                                 <h3 style="display: flex; align-items: center; gap: 5px;">
-                                    <span data-i18n="qra_card_autoshrink_title">按钮自动折叠</span>
-                                    <i class="fa-solid fa-circle-question qr-setting-help-icon" data-help="autoshrink" style="cursor: pointer; color: #999; font-size: 14px;" data-i18n="[title]qra_help_tooltip" title="查看详细说明"></i>
+                                    <span data-i18n="qra_card_autoshrink_title">Tự động thu gọn nút</span>
+                                    <i class="fa-solid fa-circle-question qr-setting-help-icon" data-help="autoshrink" style="cursor: pointer; color: #999; font-size: 14px;" data-i18n="[title]qra_help_tooltip" title="Xem giải thích chi tiết"></i>
                                 </h3>
-                                <p data-i18n="qra_card_autoshrink_desc">自动折叠聊天输入框上方的按钮区域</p>
+                                <p data-i18n="qra_card_autoshrink_desc">Tự động thu gọn khu vực nút phía trên hộp nhập liệu chat</p>
                             </div>
                             <label class="qr-toggle">
                                 <input type="checkbox" id="${Constants.ID_AUTO_SHRINK_CHECKBOX}">
@@ -246,14 +246,14 @@ export function createSettingsHtml() {
                             </label>
                         </div>
 
-                        <!-- 背景模糊卡片 -->
+                        <!-- Thẻ Làm mờ nền -->
                         <div class="qr-setting-card">
                             <div class="qr-setting-text">
                                 <h3 style="display: flex; align-items: center; gap: 5px;">
-                                    <span data-i18n="qra_card_backdrop_title">背景模糊效果</span>
-                                    <i class="fa-solid fa-circle-question qr-setting-help-icon" data-help="backdrop" style="cursor: pointer; color: #999; font-size: 14px;" data-i18n="[title]qra_help_tooltip" title="查看详细说明"></i>
+                                    <span data-i18n="qra_card_backdrop_title">Hiệu ứng làm mờ nền</span>
+                                    <i class="fa-solid fa-circle-question qr-setting-help-icon" data-help="backdrop" style="cursor: pointer; color: #999; font-size: 14px;" data-i18n="[title]qra_help_tooltip" title="Xem giải thích chi tiết"></i>
                                 </h3>
-                                <p data-i18n="qra_card_backdrop_desc">打开菜单时对背景应用毛玻璃模糊遮罩</p>
+                                <p data-i18n="qra_card_backdrop_desc">Áp dụng hiệu ứng làm mờ nền khi mở menu</p>
                             </div>
                             <label class="qr-toggle">
                                 <input type="checkbox" id="${Constants.ID_BACKDROP_ENABLED_CHECKBOX}">
@@ -261,14 +261,14 @@ export function createSettingsHtml() {
                             </label>
                         </div>
 
-                        <!-- 合并按钮卡片 -->
+                        <!-- Thẻ Gộp nút -->
                         <div class="qr-setting-card">
                             <div class="qr-setting-text">
                                 <h3 style="display: flex; align-items: center; gap: 5px;">
-                                    <span data-i18n="qra_card_combined_title">合并快速回复</span>
-                                    <i class="fa-solid fa-circle-question qr-setting-help-icon" data-help="combined" style="cursor: pointer; color: #999; font-size: 14px;" data-i18n="[title]qra_help_tooltip" title="查看详细说明"></i>
+                                    <span data-i18n="qra_card_combined_title">Gộp Phản hồi nhanh</span>
+                                    <i class="fa-solid fa-circle-question qr-setting-help-icon" data-help="combined" style="cursor: pointer; color: #999; font-size: 14px;" data-i18n="[title]qra_help_tooltip" title="Xem giải thích chi tiết"></i>
                                 </h3>
-                                <p data-i18n="qra_card_combined_desc">让输入框上方的所有的按钮都紧贴再一块</p>
+                                <p data-i18n="qra_card_combined_desc">Làm cho tất cả các nút phía trên hộp nhập liệu dính liền vào nhau</p>
                             </div>
                             <label class="qr-toggle">
                                 <input type="checkbox" id="${Constants.ID_COMBINED_BUTTONS_CHECKBOX}">
@@ -276,47 +276,47 @@ export function createSettingsHtml() {
                             </label>
                         </div>
 
-                        <!-- 菜单分组排序卡片 -->
+                        <!-- Thẻ Sắp xếp menu -->
                         <div class="qr-setting-card">
                             <div class="qr-setting-text">
                                 <h3 style="display: flex; align-items: center; gap: 5px;">
-                                    <span data-i18n="qra_card_sort_title">菜单按钮排序</span>
-                                    <i class="fa-solid fa-circle-question qr-setting-help-icon" data-help="sort" style="cursor: pointer; color: #999; font-size: 14px;" data-i18n="[title]qra_help_tooltip" title="查看详细说明"></i>
+                                    <span data-i18n="qra_card_sort_title">Sắp xếp nút trên menu</span>
+                                    <i class="fa-solid fa-circle-question qr-setting-help-icon" data-help="sort" style="cursor: pointer; color: #999; font-size: 14px;" data-i18n="[title]qra_help_tooltip" title="Xem giải thích chi tiết"></i>
                                 </h3>
-                                <p data-i18n="qra_card_sort_desc">允许对菜单按钮进行自定义排序</p>
+                                <p data-i18n="qra_card_sort_desc">Cho phép tùy chỉnh sắp xếp thứ tự các nút trên menu</p>
                             </div>
                             <button id="${Constants.ID_BTN_OPEN_SORT}" class="qr-card-btn" data-i18n="qra_btn_settings">
-                                设置
+                                Cài đặt
                             </button>
                         </div>
 
-                        <!-- 使用说明卡片 -->
+                        <!-- Thẻ Hướng dẫn sử dụng -->
                         <div class="qr-setting-card">
                             <div class="qr-setting-text">
-                                <h3 data-i18n="qra_card_help_title">插件使用说明</h3>
-                                <p data-i18n="qra_card_help_desc">查看关于本插件的详细功能介绍与帮助</p>
+                                <h3 data-i18n="qra_card_help_title">Hướng dẫn sử dụng tiện ích</h3>
+                                <p data-i18n="qra_card_help_desc">Xem chi tiết tính năng và trợ giúp về tiện ích này</p>
                             </div>
                             <button id="${Constants.ID_BTN_OPEN_HELP}" class="qr-card-btn" data-i18n="qra_btn_open">
-                                打开
+                                Mở
                             </button>
                         </div>
 
                         ${Constants.DEBUG_MODE ? `
-                        <!-- 系统日志卡片（仅 DEBUG_MODE 开启时显示） -->
+                        <!-- Thẻ Nhật ký hệ thống (Chỉ hiển thị khi bật DEBUG_MODE) -->
                         <div class="qr-setting-card" style="align-items: flex-start;">
                             <div class="qr-setting-text" style="padding-top: 5px;">
-                                <h3 data-i18n="qra_card_log_title">系统日志</h3>
-                                <p data-i18n="qra_card_log_desc">查看插件运行状态、排查问题或导出日志报告</p>
+                                <h3 data-i18n="qra_card_log_title">Nhật ký hệ thống</h3>
+                                <p data-i18n="qra_card_log_desc">Xem trạng thái hoạt động, khắc phục sự cố hoặc tải báo cáo nhật ký</p>
                             </div>
                             <div style="display: flex; flex-direction: column; gap: 5px; min-width: 140px;">
                                 <select id="qr-log-level-select" class="text_pole" style="width: 100%;">
-                                    <option value="0" data-i18n="qra_log_level_debug">DEBUG (全部)</option>
-                                    <option value="1" data-i18n="qra_log_level_info">INFO (常规)</option>
-                                    <option value="2" data-i18n="qra_log_level_warn">WARN (仅警告)</option>
-                                    <option value="3" data-i18n="qra_log_level_error">ERROR (仅错误)</option>
+                                    <option value="0" data-i18n="qra_log_level_debug">DEBUG (Tất cả)</option>
+                                    <option value="1" data-i18n="qra_log_level_info">INFO (Thông thường)</option>
+                                    <option value="2" data-i18n="qra_log_level_warn">WARN (Chỉ cảnh báo)</option>
+                                    <option value="3" data-i18n="qra_log_level_error">ERROR (Chỉ lỗi)</option>
                                 </select>
-                                <button id="qr-view-logs-btn" class="menu_button" style="width: auto; align-self: stretch;" data-i18n="qra_btn_view_logs">查看日志</button>
-                                <button id="qr-download-logs-panel-btn" class="menu_button" style="width: auto; align-self: stretch;" data-i18n="qra_btn_download_logs">下载日志</button>
+                                <button id="qr-view-logs-btn" class="menu_button" style="width: auto; align-self: stretch;" data-i18n="qra_btn_view_logs">Xem nhật ký</button>
+                                <button id="qr-download-logs-panel-btn" class="menu_button" style="width: auto; align-self: stretch;" data-i18n="qra_btn_download_logs">Tải nhật ký</button>
                             </div>
                         </div>
                         ` : ''}
@@ -324,95 +324,95 @@ export function createSettingsHtml() {
                     </div>
                 </div>
 
-                <!-- 2. 白名单管理页面 (内嵌) -->
+                <!-- 2. Trang Quản lý Danh sách trắng (Nhúng) -->
                 <div id="${Constants.ID_PAGE_WHITELIST}" class="qr-settings-page">
                     <div class="qr-whitelist-inline-container">
                         <div class="qr-whitelist-col">
-                            <label data-i18n="qra_whitelist_hidden">收纳列表 (隐藏)</label>
+                            <label data-i18n="qra_whitelist_hidden">Danh sách thu gọn (Ẩn)</label>
                             <div id="qrq-non-whitelisted-list" class="qrq-whitelist-list"></div>
                         </div>
                         <div class="qr-whitelist-col">
-                            <label data-i18n="qra_whitelist_visible">白名单列表 (显示)</label>
+                            <label data-i18n="qra_whitelist_visible">Danh sách trắng (Hiển thị)</label>
                             <div id="qrq-whitelisted-list" class="qrq-whitelist-list"></div>
                         </div>
                     </div>
 
-                    <!-- 底部说明区域 -->
+                    <!-- Khu vực giải thích dưới cùng -->
                     <div id="${Constants.ID_WHITELIST_HELP_BOX}" class="qr-whitelist-help-box">
-                        <p data-i18n="qra_whitelist_help_p1"><strong>直接点击上方列表中的选项即可将对应选项按钮移动到另一侧列表中。</strong></p>
-                        <p data-i18n="qra_whitelist_help_p2"><strong>在白名单列表中的选项的按钮将保留在聊天输入框上方，不会显示在QR助手的菜单面板中，而在收纳列表中的选项按钮则会出现菜单面板中，不出现在聊天输入框上方。</strong></p>
-                        <p data-i18n="qra_whitelist_help_p3">手机用户长摁列表中对应的QR或脚本选项，可以查看该选项具体的来源和作用域。</p>
-                        <p data-i18n="qra_whitelist_help_p4">此外，<i class="fa-solid fa-sun"></i> 表示为小白X脚本，<i class="fa-solid fa-star"></i> 表示为QR，<i class="fa-solid fa-moon"></i> 表示为酒馆助手脚本，而 <i class="fa-solid fa-puzzle-piece"></i> 表示为酒馆插件。</p>
+                        <p data-i18n="qra_whitelist_help_p1"><strong>Nhấn trực tiếp vào một tùy chọn trong danh sách trên để chuyển nút tương ứng sang danh sách bên kia.</strong></p>
+                        <p data-i18n="qra_whitelist_help_p2"><strong>Các nút trong Danh sách trắng sẽ được hiển thị cố định phía trên hộp nhập liệu và sẽ KHÔNG hiển thị trong menu của QR Assistant. Ngược lại, các nút trong Danh sách thu gọn sẽ hiển thị trong menu và KHÔNG hiển thị trên hộp nhập liệu.</strong></p>
+                        <p data-i18n="qra_whitelist_help_p3">Người dùng điện thoại có thể nhấn giữ vào tùy chọn để xem chi tiết nguồn và phạm vi hoạt động của nút.</p>
+                        <p data-i18n="qra_whitelist_help_p4">Ngoài ra, <i class="fa-solid fa-sun"></i> là script LittleWhiteBox, <i class="fa-solid fa-star"></i> là Quick Reply, <i class="fa-solid fa-moon"></i> là script Tavern Helper, và <i class="fa-solid fa-puzzle-piece"></i> là tiện ích bên thứ 3.</p>
                     </div>
                 </div>
 
-                <!-- 3. 图标设置页面 -->
+                <!-- 3. Trang Cài đặt Biểu tượng -->
                 <div id="${Constants.ID_PAGE_ICON}" class="qr-settings-page">
-                    <!-- 注意：弹窗遮罩已移至 body 根节点，不再此处 -->
+                    <!-- Lưu ý: Lớp mờ của popup đã được dời đến root của body -->
 
                     <div class="qr-icon-settings-layout">
-                        <!-- 顶部切换栏 -->
+                        <!-- Thanh chuyển đổi trên cùng -->
                         <div class="qr-icon-top-bar">
                             <select id="${Constants.ID_ICON_SOURCE_SELECT}" class="text_pole" style="flex:1;">
-                                <option value="builtin" data-i18n="qra_icon_source_builtin">内置图标</option>
-                                <option value="character" data-i18n="qra_icon_source_character">当前角色卡</option>
-                                <option value="custom" data-i18n="qra_icon_source_custom">自定义图标</option>
+                                <option value="builtin" data-i18n="qra_icon_source_builtin">Biểu tượng tích hợp</option>
+                                <option value="character" data-i18n="qra_icon_source_character">Thẻ nhân vật hiện tại</option>
+                                <option value="custom" data-i18n="qra_icon_source_custom">Biểu tượng tùy chỉnh</option>
                             </select>
                         </div>
 
-                        <!-- 内容显示区 -->
+                        <!-- Khu vực hiển thị nội dung -->
                         <div class="qr-icon-content">
 
-                            <!-- A. 内置图标面板 -->
+                            <!-- A. Bảng Biểu tượng tích hợp -->
                             <div id="${Constants.ID_PANEL_BUILTIN}" class="qr-icon-panel active">
-                                <!-- 修改方向为 row，添加垂直居中 -->
+                                <!-- Đổi chiều thành hàng ngang (row), thêm căn giữa dọc -->
                                 <div style="display:flex; flex-direction:row; gap:5px; align-items:center;">
-									<label style="font-weight:bold; min-width: 70px;" data-i18n="qra_label_btn_icon">按钮图标:</label>
+									<label style="font-weight:bold; min-width: 70px;" data-i18n="qra_label_btn_icon">Biểu tượng:</label>
                                     <select id="${Constants.ID_BUILTIN_DROPDOWN}" class="text_pole" style="flex:1;">
-                                        <option value="${Constants.ICON_TYPES.ROCKET}" data-i18n="qra_icon_rocket">小火箭</option>
-                                        <option value="${Constants.ICON_TYPES.BOLT}" data-i18n="qra_icon_bolt">六芒星</option>
-                                        <option value="${Constants.ICON_TYPES.COMMENT}" data-i18n="qra_icon_comment">调色盘</option>
-                                        <option value="${Constants.ICON_TYPES.STAR}" data-i18n="qra_icon_star">星月</option>
-                                        <option value="${Constants.ICON_TYPES.FAN}" data-i18n="qra_icon_fan">风车</option>
-                                        <option value="${Constants.ICON_TYPES.PENCIL}" data-i18n="qra_icon_pencil">小铅笔</option>
-                                        <option value="${Constants.ICON_TYPES.BOOK}" data-i18n="qra_icon_book">书本</option>
-                                        <option value="${Constants.ICON_TYPES.MUG}" data-i18n="qra_icon_mug">热咖啡</option>
-                                        <option value="${Constants.ICON_TYPES.CROWN}" data-i18n="qra_icon_crown">皇冠</option>
-                                        <option value="${Constants.ICON_TYPES.GEM}" data-i18n="qra_icon_gem">钻石</option>
-                                        <option value="${Constants.ICON_TYPES.HEADPHONES}" data-i18n="qra_icon_headphones">耳机</option>
+                                        <option value="${Constants.ICON_TYPES.ROCKET}" data-i18n="qra_icon_rocket">Tên lửa</option>
+                                        <option value="${Constants.ICON_TYPES.BOLT}" data-i18n="qra_icon_bolt">Ngôi sao 6 cánh</option>
+                                        <option value="${Constants.ICON_TYPES.COMMENT}" data-i18n="qra_icon_comment">Bảng màu</option>
+                                        <option value="${Constants.ICON_TYPES.STAR}" data-i18n="qra_icon_star">Sao & Trăng khuyết</option>
+                                        <option value="${Constants.ICON_TYPES.FAN}" data-i18n="qra_icon_fan">Chong chóng</option>
+                                        <option value="${Constants.ICON_TYPES.PENCIL}" data-i18n="qra_icon_pencil">Cây bút chì</option>
+                                        <option value="${Constants.ICON_TYPES.BOOK}" data-i18n="qra_icon_book">Quyển sách</option>
+                                        <option value="${Constants.ICON_TYPES.MUG}" data-i18n="qra_icon_mug">Cốc cà phê</option>
+                                        <option value="${Constants.ICON_TYPES.CROWN}" data-i18n="qra_icon_crown">Vương miện</option>
+                                        <option value="${Constants.ICON_TYPES.GEM}" data-i18n="qra_icon_gem">Kim cương</option>
+                                        <option value="${Constants.ICON_TYPES.HEADPHONES}" data-i18n="qra_icon_headphones">Tai nghe</option>
                                     </select>
                                 </div>
                                 <div class="qr-icon-preview-box" id="${Constants.ID_BUILTIN_PREVIEW}">
-                                    <!-- JS 填充 -->
+                                    <!-- JS Điền -->
                                     <i class="fa-solid fa-star-and-crescent"></i>
-                                    <span class="qr-icon-preview-label" data-i18n="qra_label_preview">预览</span>
+                                    <span class="qr-icon-preview-label" data-i18n="qra_label_preview">Xem trước</span>
                                 </div>
-                                <!-- 图标大小控制 -->
+                                <!-- Điều khiển kích thước biểu tượng -->
                                 <div style="display:flex; flex-direction:column; gap:5px;">
                                     <div style="display:flex; flex-direction:row; gap:5px; align-items:center;">
-                                        <label style="font-weight:bold; min-width: 70px;" data-i18n="qra_label_icon_size">图标大小:</label>
+                                        <label style="font-weight:bold; min-width: 70px;" data-i18n="qra_label_icon_size">Kích thước:</label>
                                         <select id="${Constants.ID_BUILTIN_SIZE_SELECT}" class="text_pole" style="flex:1;">
-                                            <option value="match" data-i18n="qra_opt_size_match">与发送按钮保持一致大小</option>
-                                            <option value="custom" data-i18n="qra_opt_size_custom">自定义内置图标大小</option>
+                                            <option value="match" data-i18n="qra_opt_size_match">Khớp với nút Gửi</option>
+                                            <option value="custom" data-i18n="qra_opt_size_custom">Tùy chỉnh kích thước</option>
                                         </select>
                                     </div>
                                     <div id="${Constants.ID_BUILTIN_SIZE_INPUT}-wrapper" style="display:none; flex-direction:row; gap:5px; align-items:center;">
-                                        <label style="font-weight:bold; min-width: 70px;" data-i18n="qra_label_size_em">大小 (em):</label>
-                                        <input type="number" id="${Constants.ID_BUILTIN_SIZE_INPUT}" class="text_pole" style="flex:1;" step="0.1" min="0.1" placeholder="例如: 1.5">
+                                        <label style="font-weight:bold; min-width: 70px;" data-i18n="qra_label_size_em">Cỡ (em):</label>
+                                        <input type="number" id="${Constants.ID_BUILTIN_SIZE_INPUT}" class="text_pole" style="flex:1;" step="0.1" min="0.1" placeholder="Ví dụ: 1.5">
                                     </div>
                                 </div>
                             </div>
 
-                            <!-- A2. 当前角色卡面板 -->
+                            <!-- A2. Bảng Thẻ nhân vật hiện tại -->
                             <div id="${Constants.ID_PANEL_CHARACTER}" class="qr-icon-panel">
-                                <p style="text-align:center; opacity:0.6; font-size:13px; margin:0;" data-i18n="qra_char_desc">显示当前聊天角色的头像作为按钮图标，切换聊天时自动更新</p>
+                                <p style="text-align:center; opacity:0.6; font-size:13px; margin:0;" data-i18n="qra_char_desc">Sử dụng ảnh đại diện của nhân vật hiện tại làm biểu tượng, tự động cập nhật khi chuyển chat</p>
                                 <div class="qr-icon-preview-box" id="${Constants.ID_PANEL_CHARACTER}-preview">
-                                    <span data-i18n="qra_char_no_avatar">无角色头像</span>
-                                    <span class="qr-icon-preview-label" data-i18n="qra_label_preview">预览</span>
+                                    <span data-i18n="qra_char_no_avatar">Không có ảnh</span>
+                                    <span class="qr-icon-preview-label" data-i18n="qra_label_preview">Xem trước</span>
                                 </div>
-                                <!-- 头像旋转控制开关 -->
+                                <!-- Công tắc bật/tắt hoạt ảnh xoay ảnh đại diện -->
                                 <div style="margin-top: 15px; border-top: 1px solid var(--SmartThemeBorderColor, rgba(255,255,255,0.1)); padding-top: 10px; display: flex; justify-content: space-between; align-items: center;">
-                                    <span style="font-size: 13px;" data-i18n="qra_char_avatar_rotation">开启头像旋转动画</span>
+                                    <span style="font-size: 13px;" data-i18n="qra_char_avatar_rotation">Bật hoạt ảnh xoay ảnh đại diện</span>
                                     <label class="qr-toggle">
                                         <input type="checkbox" id="qr-toggle-avatar-rotation">
                                         <span class="qr-slider"></span>
@@ -420,27 +420,27 @@ export function createSettingsHtml() {
                                 </div>
                             </div>
 
-                            <!-- B. 自定义图标面板 -->
+                            <!-- B. Bảng Biểu tượng tùy chỉnh -->
                             <div id="${Constants.ID_PANEL_CUSTOM}" class="qr-icon-panel">
-                                <!-- 修改方向为 row，添加垂直居中 -->
+                                <!-- Đổi chiều thành hàng ngang (row), thêm căn giữa dọc -->
                                 <div style="display:flex; flex-direction:row; gap:5px; align-items:center;">
-                                <label style="font-weight:bold; min-width: 70px;" data-i18n="qra_label_btn_icon">按钮图标:</label>
+                                <label style="font-weight:bold; min-width: 70px;" data-i18n="qra_label_btn_icon">Biểu tượng:</label>
                                     <select id="${Constants.ID_CUSTOM_DROPDOWN}" class="text_pole" style="flex:1;">
-                                        <option value="" data-i18n="qra_custom_placeholder">-- 请选择或新增 --</option>
+                                        <option value="" data-i18n="qra_custom_placeholder">-- Chọn hoặc Thêm mới --</option>
                                     </select>
                                 </div>
 
                                 <div class="qr-icon-preview-box" id="${Constants.ID_CUSTOM_PREVIEW}">
-                                    <span data-i18n="qra_custom_no_icon">无图标</span>
-                                    <span class="qr-icon-preview-label" data-i18n="qra_label_preview">预览</span>
+                                    <span data-i18n="qra_custom_no_icon">Không có</span>
+                                    <span class="qr-icon-preview-label" data-i18n="qra_label_preview">Xem trước</span>
                                 </div>
 
                                 <div class="qr-icon-actions">
                                     <button id="${Constants.ID_BTN_MANAGE_CUSTOM}" class="menu_button">
-                                        <i class="fa-solid fa-list"></i> <span data-i18n="qra_btn_manage_icons">管理图标</span>
+                                        <i class="fa-solid fa-list"></i> <span data-i18n="qra_btn_manage_icons">Quản lý</span>
                                     </button>
                                     <button id="${Constants.ID_BTN_ADD_CUSTOM}" class="menu_button">
-                                        <i class="fa-solid fa-plus"></i> <span data-i18n="qra_btn_add_icon">新增图标</span>
+                                        <i class="fa-solid fa-plus"></i> <span data-i18n="qra_btn_add_icon">Thêm mới</span>
                                     </button>
                                 </div>
                             </div>
@@ -454,48 +454,48 @@ export function createSettingsHtml() {
     </div>`;
 }
 
-// --- 弹窗 HTML 生成器 ---
+// --- Trình tạo HTML cho Popup ---
 function createManageModalHtml(savedIcons) {
     let listHtml = '';
     if (savedIcons && savedIcons.length > 0) {
         savedIcons.forEach((icon, index) => {
-            // 获取大小，如果没有则显示默认 1.2
+            // Lấy kích thước, nếu không có thì mặc định hiển thị 1.2
             const sizeDisplay = icon.size || '1.2';
 
             listHtml += `
             <div class="qr-manage-item" data-index="${index}">
-                <!-- 图标预览 -->
+                <!-- Xem trước biểu tượng -->
                 <img src="${icon.url}" onerror="this.src=''">
 
-                <!-- 名称与详情区域 -->
+                <!-- Khu vực tên và chi tiết -->
                 <div style="flex:1; overflow:hidden; display:flex; flex-direction:column; justify-content:center;">
                     <span class="qr-manage-name" title="${icon.name}" style="font-weight:bold; font-size:14px;">${icon.name}</span>
                 </div>
 
-                <!-- 操作按钮 -->
+                <!-- Nút thao tác -->
                 <div class="qr-manage-actions">
-                    <!-- 改为调用 editIcon -->
-                    <button class="qr-icon-btn edit" title="${translate('编辑', 'qra_title_edit')}" onclick="window.quickReplyMenu.editIcon(${index})">
+                    <!-- Sửa lại để gọi editIcon -->
+                    <button class="qr-icon-btn edit" title="${translate('Sửa', 'qra_title_edit')}" onclick="window.quickReplyMenu.editIcon(${index})">
                         <i class="fa-solid fa-pen"></i>
                     </button>
-                    <button class="qr-icon-btn delete" title="${translate('删除', 'qra_title_delete')}" onclick="window.quickReplyMenu.deleteIcon(${index})">
+                    <button class="qr-icon-btn delete" title="${translate('Xóa', 'qra_title_delete')}" onclick="window.quickReplyMenu.deleteIcon(${index})">
                         <i class="fa-solid fa-trash"></i>
                     </button>
                 </div>
             </div>`;
         });
     } else {
-        listHtml = `<div style="text-align:center; padding:20px; color:#888;" data-i18n="qra_no_saved_icons">暂无保存的图标</div>`;
+        listHtml = `<div style="text-align:center; padding:20px; color:#888;" data-i18n="qra_no_saved_icons">Không có biểu tượng nào được lưu</div>`;
     }
 
     return `
     <div class="qr-modal-box" id="${Constants.ID_MODAL_MANAGE}">
-        <div class="qr-modal-header" data-i18n="qra_modal_manage_title">管理自定义图标</div>
+        <div class="qr-modal-header" data-i18n="qra_modal_manage_title">Quản lý biểu tượng tùy chỉnh</div>
         <div class="qr-manage-list" id="${Constants.ID_LIST_MANAGE}">
             ${listHtml}
         </div>
         <div class="qr-modal-footer">
-            <button id="${Constants.ID_BTN_CLOSE_MANAGE}" class="menu_button" data-i18n="qra_btn_close">关闭</button>
+            <button id="${Constants.ID_BTN_CLOSE_MANAGE}" class="menu_button" data-i18n="qra_btn_close">Đóng</button>
         </div>
     </div>`;
 }
@@ -503,75 +503,75 @@ function createManageModalHtml(savedIcons) {
 function createAddModalHtml() {
     return `
     <div class="qr-modal-box" id="${Constants.ID_MODAL_ADD}">
-        <div class="qr-modal-header" data-i18n="qra_modal_add_title">新增自定义图标</div>
+        <div class="qr-modal-header" data-i18n="qra_modal_add_title">Thêm biểu tượng tùy chỉnh</div>
 
         <div class="qr-input-group">
-            <label data-i18n="qra_label_name">名称:</label>
-            <input type="text" id="${Constants.ID_INPUT_ADD_NAME}" class="text_pole" placeholder="例如: 派蒙" data-i18n="[placeholder]qra_placeholder_name">
+            <label data-i18n="qra_label_name">Tên:</label>
+            <input type="text" id="${Constants.ID_INPUT_ADD_NAME}" class="text_pole" placeholder="Ví dụ: Paimon" data-i18n="[placeholder]qra_placeholder_name">
         </div>
 
         <div class="qr-input-group">
             <div style="display:flex; justify-content:space-between;">
-                <label data-i18n="qra_label_icon_url">图标 URL:</label>
-                <a href="https://catbox.moe/" target="_blank" class="qr-upload-link" title="前往 Catbox 上传图片">
-                    <i class="fa-solid fa-cloud-arrow-up"></i> <span data-i18n="qra_link_image_host">免费图床</span>
+                <label data-i18n="qra_label_icon_url">URL biểu tượng:</label>
+                <a href="https://catbox.moe/" target="_blank" class="qr-upload-link" title="Mở Catbox để tải ảnh lên">
+                    <i class="fa-solid fa-cloud-arrow-up"></i> <span data-i18n="qra_link_image_host">Host ảnh miễn phí</span>
                 </a>
             </div>
-            <input type="text" id="${Constants.ID_INPUT_ADD_URL}" class="text_pole" placeholder="输入图片的图床链接" data-i18n="[placeholder]qra_placeholder_url">
+            <input type="text" id="${Constants.ID_INPUT_ADD_URL}" class="text_pole" placeholder="Nhập đường dẫn trực tiếp của ảnh" data-i18n="[placeholder]qra_placeholder_url">
         </div>
 
         <div class="qr-input-group">
-            <label data-i18n="qra_label_icon_size_hint">图标大小 (默认值1.2表示与发送按钮保持一致大小。因此非必要请不要修改该值，除非您确实想要强制调大或调小该图标):</label>
-            <input type="number" id="${Constants.ID_INPUT_ADD_SIZE}" class="text_pole" value="1.2" step="0.1" min="0.1" placeholder="例如: 1.2">
+            <label data-i18n="qra_label_icon_size_hint">Kích thước biểu tượng (Mặc định 1.2 sẽ hiển thị bằng kích thước nút Gửi gốc. Vui lòng không đổi nếu không cần thiết):</label>
+            <input type="number" id="${Constants.ID_INPUT_ADD_SIZE}" class="text_pole" value="1.2" step="0.1" min="0.1" placeholder="Ví dụ: 1.2">
         </div>
 
         <div class="qr-input-group">
-            <label data-i18n="qra_label_preview">预览:</label>
+            <label data-i18n="qra_label_preview">Xem trước:</label>
             <div class="qr-icon-preview-box" id="${Constants.ID_PREVIEW_ADD}" style="min-height:80px; font-size:1.5em;">
-                <span>Wait...</span>
+                <span>Đang tải...</span>
             </div>
         </div>
 
         <div class="qr-modal-footer">
-            <button id="${Constants.ID_BTN_SAVE_NEW}" class="menu_button primary" data-i18n="qra_btn_save">保存</button>
-            <button class="menu_button" onclick="document.getElementById('${Constants.ID_MODAL_OVERLAY}').classList.remove('visible')" data-i18n="qra_btn_cancel">取消</button>
+            <button id="${Constants.ID_BTN_SAVE_NEW}" class="menu_button primary" data-i18n="qra_btn_save">Lưu</button>
+            <button class="menu_button" onclick="document.getElementById('${Constants.ID_MODAL_OVERLAY}').classList.remove('visible')" data-i18n="qra_btn_cancel">Hủy</button>
         </div>
     </div>`;
 }
 
 function createEditModalHtml(icon) {
-    // 复用 Constants 中的 ID，因为弹窗是互斥的，不会冲突
+    // Tái sử dụng ID từ Constants vì các popup loại trừ lẫn nhau, sẽ không gây xung đột
     return `
     <div class="qr-modal-box" id="${Constants.ID_MODAL_ADD}">
-        <div class="qr-modal-header" data-i18n="qra_modal_edit_title">编辑图标</div>
+        <div class="qr-modal-header" data-i18n="qra_modal_edit_title">Sửa biểu tượng</div>
 
         <div class="qr-input-group">
-            <label data-i18n="qra_label_name">名称:</label>
+            <label data-i18n="qra_label_name">Tên:</label>
             <input type="text" id="${Constants.ID_INPUT_ADD_NAME}" class="text_pole" value="${icon.name}">
         </div>
 
         <div class="qr-input-group">
             <div style="display:flex; justify-content:space-between;">
-                <label data-i18n="qra_label_icon_url">图标 URL:</label>
+                <label data-i18n="qra_label_icon_url">URL biểu tượng:</label>
             </div>
             <input type="text" id="${Constants.ID_INPUT_ADD_URL}" class="text_pole" value="${icon.url}">
         </div>
 
         <div class="qr-input-group">
-            <label data-i18n="qra_label_icon_size_hint">图标大小 (默认值1.2表示与发送按钮保持一致大小。因此非必要请不要修改该值，除非您确实想要强制调大或调小该图标):</label>
+            <label data-i18n="qra_label_icon_size_hint">Kích thước biểu tượng (Mặc định 1.2 sẽ hiển thị bằng kích thước nút Gửi gốc. Vui lòng không đổi nếu không cần thiết):</label>
             <input type="number" id="${Constants.ID_INPUT_ADD_SIZE}" class="text_pole" value="${icon.size || '1.2'}" step="0.1" min="0.1">
         </div>
 
         <div class="qr-input-group">
-            <label data-i18n="qra_label_preview">预览:</label>
+            <label data-i18n="qra_label_preview">Xem trước:</label>
             <div class="qr-icon-preview-box" id="${Constants.ID_PREVIEW_ADD}" style="min-height:80px; font-size:1.5em;">
                 <img src="${icon.url}" style="height: ${icon.size || '1.2'}em;">
             </div>
         </div>
 
         <div class="qr-modal-footer">
-            <button id="qr-btn-save-edit" class="menu_button primary" data-i18n="qra_btn_save_changes">保存修改</button>
-            <button id="qr-btn-cancel-edit" class="menu_button" data-i18n="qra_btn_back">返回</button>
+            <button id="qr-btn-save-edit" class="menu_button primary" data-i18n="qra_btn_save_changes">Lưu thay đổi</button>
+            <button id="qr-btn-cancel-edit" class="menu_button" data-i18n="qra_btn_back">Quay lại</button>
         </div>
     </div>`;
 }
@@ -596,7 +596,7 @@ export function handleSettingsChange(event) {
         }
         applyWhitelistDOMChanges();
     }
-    // --- 新版图标逻辑 ---
+    // --- Logic biểu tượng phiên bản mới ---
     else if (id === Constants.ID_BUILTIN_DROPDOWN) {
         settings.iconType = val;
         settings._builtinIconType = val;
@@ -612,7 +612,7 @@ export function handleSettingsChange(event) {
         }
 
         if (!isCustom) {
-            // 切回"与发送按钮保持一致"，备份自定义值到 _customSize
+            // Chuyển về "Khớp với nút Gửi", sao lưu giá trị tùy chỉnh vào _customSize
             const existingSize = parseFloat(settings.builtinIconSize);
             if (!isNaN(existingSize) && existingSize > 0) {
                 settings._customIconSize = settings.builtinIconSize;
@@ -620,7 +620,7 @@ export function handleSettingsChange(event) {
             settings.builtinIconSize = 'match';
             if (sizeInput) sizeInput.value = '';
         } else {
-            // 切换到自定义：优先恢复之前备份的自定义值
+            // Chuyển sang Tùy chỉnh: Ưu tiên khôi phục giá trị tùy chỉnh đã sao lưu trước đó
             const savedCustom = parseFloat(settings._customIconSize);
             if (!isNaN(savedCustom) && savedCustom > 0) {
                 settings.builtinIconSize = settings._customIconSize;
@@ -639,13 +639,13 @@ export function handleSettingsChange(event) {
     }
     else if (id === Constants.ID_BUILTIN_SIZE_INPUT) {
         const sizeSelect = document.getElementById(Constants.ID_BUILTIN_SIZE_SELECT);
-        if (sizeSelect && sizeSelect.value !== 'custom') return; // 仅在自定义模式下响应
+        if (sizeSelect && sizeSelect.value !== 'custom') return; // Chỉ phản hồi ở chế độ tùy chỉnh
 
         const numVal = parseFloat(val);
         if (!isNaN(numVal) && numVal > 0) {
             settings.builtinIconSize = val;
         } else {
-            // 无效输入（负数、0、字母、空），回退到 match
+            // Giá trị nhập không hợp lệ (số âm, 0, chữ cái, rỗng), quay về 'match'
             settings.builtinIconSize = 'match';
             if (sizeSelect) sizeSelect.value = 'match';
             const inputWrapper = document.getElementById(`${Constants.ID_BUILTIN_SIZE_INPUT}-wrapper`);
@@ -691,7 +691,7 @@ export function saveSettings() {
     if (context && typeof context.saveSettingsDebounced === 'function') {
         context.saveSettingsDebounced();
     } else {
-        Logger.warn(LogCategory.SYSTEM, '保存设置函数未找到');
+        Logger.warn(LogCategory.SYSTEM, 'Không tìm thấy hàm lưu cài đặt');
     }
 }
 
@@ -713,7 +713,7 @@ export function loadAndApplySettings() {
         combinedCheck.checked = window.quickReplyApi?.settings?.isCombined || false;
     }
 
-    // --- 新 UI 初始化 ---
+    // --- Khởi tạo UI mới ---
     refreshCustomDropdown();
 
     const isCustom = settings.iconType === Constants.ICON_TYPES.CUSTOM;
@@ -724,16 +724,16 @@ export function loadAndApplySettings() {
     const panelCustom = document.getElementById(Constants.ID_PANEL_CUSTOM);
     const panelCharacter = document.getElementById(Constants.ID_PANEL_CHARACTER);
 
-    // 设置下拉框值并切换面板
+    // Gán giá trị cho khung chọn và chuyển đổi bảng
     if (sourceSelect) sourceSelect.value = isCustom ? 'custom' : isCharacter ? 'character' : 'builtin';
 
-    // 始终恢复所有面板的 DOM 状态，确保切换回来时不会丢失配置
-    // 恢复内置图标面板状态
+    // Luôn khôi phục trạng thái DOM của tất cả các bảng, đảm bảo không bị mất cấu hình khi chuyển đổi lại
+    // Khôi phục trạng thái bảng Biểu tượng tích hợp
     const builtinIconType = settings._builtinIconType || (isBuiltin ? settings.iconType : Constants.ICON_TYPES.STAR);
     const ddBuiltin = document.getElementById(Constants.ID_BUILTIN_DROPDOWN);
     if(ddBuiltin) ddBuiltin.value = builtinIconType;
 
-    // 恢复内置图标大小设置
+    // Khôi phục thiết lập kích thước Biểu tượng tích hợp
     const sizeSelect = document.getElementById(Constants.ID_BUILTIN_SIZE_SELECT);
     const sizeInput = document.getElementById(Constants.ID_BUILTIN_SIZE_INPUT);
     const sizeInputWrapper = document.getElementById(`${Constants.ID_BUILTIN_SIZE_INPUT}-wrapper`);
@@ -751,7 +751,7 @@ export function loadAndApplySettings() {
 
     updateBuiltinPreview(builtinIconType);
 
-    // 显示当前激活的面板
+    // Hiển thị bảng đang kích hoạt
     if (isCustom) {
         if(panelCustom) panelCustom.classList.add('active');
         if(panelBuiltin) panelBuiltin.classList.remove('active');
@@ -783,47 +783,47 @@ export function loadAndApplySettings() {
 
     applyThemeStyles();
 
-    // 初始化滑块位置
+    // Khởi tạo vị trí thanh trượt
     setTimeout(() => {
         updateTabGliderState();
-    }, 100); // 略微延迟等待 DOM 渲染布局
+    }, 100); // Trì hoãn một chút để chờ DOM hiển thị bố cục
 
-    // 刷新更新 UI 状态 (使用缓存或静默检测)
+    // Làm mới trạng thái UI cập nhật (Sử dụng bộ nhớ đệm hoặc kiểm tra ngầm)
     refreshUpdateUI(false);
 
-    // 初始化白名单说明区域的显隐
+    // Khởi tạo hiển thị/ẩn vùng hướng dẫn Danh sách trắng
     const helpBox = document.getElementById(Constants.ID_WHITELIST_HELP_BOX);
     if (helpBox) {
         helpBox.style.display = settings.hideWhitelistHelp ? 'none' : 'block';
     }
 
-    // --- 应用日志级别设置 ---
-    // 默认为 1 (INFO)，兼容旧配置文件
+    // --- Áp dụng thiết lập cấp độ nhật ký ---
+    // Mặc định là 1 (INFO), tương thích với tệp cấu hình cũ
     const savedLevel = settings.logLevel !== undefined ? settings.logLevel : 1;
 
-    // 1. 应用到 Logger 系统
+    // 1. Áp dụng cho Hệ thống Logger
     Logger.setLevel(savedLevel);
 
-    // 2. 回显到 UI 下拉框
+    // 2. Phản hồi về khung chọn UI
     const logSelect = document.getElementById('qr-log-level-select');
     if (logSelect) {
         logSelect.value = savedLevel;
     }
 
-    // 恢复头像旋转开关状态
+    // Khôi phục trạng thái công tắc xoay ảnh đại diện
     const toggleAvatarRotation = document.getElementById('qr-toggle-avatar-rotation');
     if (toggleAvatarRotation) {
         toggleAvatarRotation.checked = settings.enableAvatarRotation || false;
     }
 
-    // 初始化菜单按钮排序的按钮文本
+    // Khởi tạo tên nút trong phần "Sắp xếp nút menu"
     const sortBtn = document.getElementById(Constants.ID_BTN_OPEN_SORT);
     if (sortBtn) {
         if (settings.enableCustomSort) {
-            sortBtn.textContent = translate('已开启自定义排序模式', 'qra_sort_btn_enabled');
-            sortBtn.removeAttribute('data-i18n'); // 移除原先的翻译属性防止覆盖
+            sortBtn.textContent = translate('Đã bật chế độ sắp xếp tùy chỉnh', 'qra_sort_btn_enabled');
+            sortBtn.removeAttribute('data-i18n'); // Bỏ thuộc tính dịch gốc để không bị ghi đè
         } else {
-            sortBtn.textContent = translate('设置', 'qra_btn_settings');
+            sortBtn.textContent = translate('Cài đặt', 'qra_btn_settings');
             sortBtn.setAttribute('data-i18n', 'qra_btn_settings');
         }
     }
@@ -846,22 +846,22 @@ export function populateWhitelistManagementUI() {
             id = `QRV2::${r.setName}`;
         }
         else if(r.source === 'LittleWhiteBox') {
-            // 如果是角色任务集，使用统一 ID，并显示特定名称
+            // Nếu là tác vụ của thẻ nhân vật, dùng ID chung và hiển thị tên riêng
             if (r.isLwbCharSet) {
                 id = 'LWB::Character_Set';
-                // 需求：显示为 "小白X-${当前角色名称}"
-                // r.setName 在 api.js 中已被设为角色名
+                // Yêu cầu: Hiển thị là "小白X-${Tên nhân vật hiện tại}"
+                // r.setName trong api.js đã được đặt thành tên nhân vật
                 displayName = `小白X-${r.setName}`;
             } else {
                 id = `LWB::${r.taskScope}::${r.taskId}`;
-                // 需求：显示为 "小白X-${脚本名称}"
-                // r.taskId 即为脚本名称
+                // Yêu cầu: Hiển thị là "小白X-${Tên script}"
+                // r.taskId chính là tên script
                 displayName = `小白X-${r.taskId}`;
             }
         }
         else if(r.source === 'RawDomElement') {
-            // 原生第三方按钮的白名单 ID 直接使用它们的 domId
-            id = r.domId; // 即 pt-wb-common-button 或 zero-preset-btn
+            // ID Danh sách trắng của nút bên thứ 3 (gốc) sử dụng trực tiếp domId của chúng
+            id = r.domId; // vd: pt-wb-common-button hoặc zero-preset-btn
         }
 
         if(id && !map.has(id)) map.set(id, { name: displayName, scope: r.scope });
@@ -874,26 +874,26 @@ export function populateWhitelistManagementUI() {
     nonList.innerHTML = ''; wlList.innerHTML = '';
     
     map.forEach((data, id) => {
-        // 从对象中解构出 name 和保存的 scope
+        // Trích xuất name và scope đã lưu từ object
         const { name, scope: savedScope } = data;
 
         const div = document.createElement('div');
         div.className = 'qrq-whitelist-item';
 
-        // --- 图标映射逻辑 ---
+        // --- Logic ánh xạ biểu tượng ---
         let iconHtml = '';
         if (id.startsWith('JSR::')) {
-            iconHtml = '<i class="fa-solid fa-moon" title="JSR Script"></i>';
+            iconHtml = '<i class="fa-solid fa-moon" title="Script JSR"></i>';
         } else if (id.startsWith('LWB::')) {
-            iconHtml = '<i class="fa-solid fa-sun" title="XB Task"></i>';
+            iconHtml = '<i class="fa-solid fa-sun" title="Tác vụ LittleWhiteBox"></i>';
         } else if (id.startsWith('QRV2::')) {
-            iconHtml = '<i class="fa-solid fa-star" title="Quick Reply"></i>';
+            iconHtml = '<i class="fa-solid fa-star" title="Phản hồi nhanh"></i>';
         } else {
-            // 给第三方原生插件按钮一个统一的"拼图"图标
-            iconHtml = '<i class="fa-solid fa-puzzle-piece" title="Third Party"></i>';
+            // Đặt cho các nút tiện ích gốc bên thứ 3 một biểu tượng "Mảnh ghép" chung
+            iconHtml = '<i class="fa-solid fa-puzzle-piece" title="Bên thứ ba"></i>';
         }
 
-        // 使用 flex 布局对齐图标和文本
+        // Dùng flexbox để canh lề biểu tượng và văn bản
         div.innerHTML = `${iconHtml}<span style="flex:1; overflow:hidden; text-overflow:ellipsis;">${name}</span>`;
 
         div.onclick = () => {
@@ -908,18 +908,18 @@ export function populateWhitelistManagementUI() {
             if(window.quickReplyMenu?.applyWhitelistDOMChanges) window.quickReplyMenu.applyWhitelistDOMChanges();
         };
 
-        // --- 悬停与触摸交互逻辑 ---
+        // --- Logic thao tác nhấn giữ (Hover & Touch) ---
 
-        // 1. 预先构建数据对象
+        // 1. Dựng trước object dữ liệu
         let source = 'Unknown';
-        // 优先使用 api.js 传来的 scope，如果没有则默认为 global
+        // Ưu tiên dùng scope truyền từ api.js, nếu không có thì lấy mặc định là global
         let scope = savedScope || 'global';
 
         if (id.startsWith('JSR::')) source = 'JSSlashRunner';
         else if (id.startsWith('QRV2::')) source = 'QuickReplyV2';
         else if (id.startsWith('LWB::')) {
             source = 'LittleWhiteBox';
-            // 针对 LWB 保持 ID 解析逻辑以确保准确性
+            // Vẫn giữ logic phân tích ID cho LWB để đảm bảo độ chính xác
             scope = id.split('::')[1]; // LWB::{scope}::{taskId}
         }
         else if (id === 'pt-wb-common-button' || id === 'zero-preset-btn') {
@@ -933,13 +933,13 @@ export function populateWhitelistManagementUI() {
             setName: name
         };
 
-        // 2. 状态控制变量
+        // 2. Biến điều khiển trạng thái
         let pressTimer = null;
         let isTouchAction = false;
 
-        // 3. 鼠标悬停 (Desktop)
+        // 3. Chuột di chuột (Desktop)
         div.addEventListener('mouseenter', (e) => {
-            // 如果是由触摸操作引发的模拟鼠标事件，则忽略，防止点击时弹出
+            // Nếu do sự kiện vuốt chạm mô phỏng chuột, bỏ qua để tránh việc bung tooltip khi bấm
             if (isTouchAction) return;
             showTooltip(e, mockReply, true);
         });
@@ -948,13 +948,13 @@ export function populateWhitelistManagementUI() {
             hideTooltip();
         });
 
-        // 4. 触摸长按 (Mobile)
+        // 4. Nhấn giữ màn hình cảm ứng (Mobile)
         div.addEventListener('touchstart', (e) => {
             isTouchAction = true;
             pressTimer = setTimeout(() => {
-                // 长按 600ms 后显示信息
-                // 修复：异步回调中原事件对象的 currentTarget 会丢失，
-                // 必须显式捕获当前的 DOM 元素 (div) 并伪造一个事件对象传给 showTooltip
+                // Hiển thị thông tin sau khi nhấn giữ 600ms
+                // Khắc phục: Trong callback bất đồng bộ, currentTarget gốc sẽ bị mất,
+                // bắt buộc chụp rõ phần tử DOM hiện tại (div) rồi tạo event mô phỏng truyền vào showTooltip
                 const mockEvent = { currentTarget: div };
                 showTooltip(mockEvent, mockReply, true);
             }, 600);
@@ -962,18 +962,18 @@ export function populateWhitelistManagementUI() {
 
         const clearTouchState = () => {
             if (pressTimer) clearTimeout(pressTimer);
-            hideTooltip(); // 松手隐藏
-            // 延迟重置标记，确保覆盖随后的 mouseenter/click 事件周期
+            hideTooltip(); // Nhả tay ẩn tooltip
+            // Trì hoãn việc đặt lại trạng thái, đảm bảo vượt qua chu kỳ sự kiện mouseenter/click ngay sau đó
             setTimeout(() => { isTouchAction = false; }, 500);
         };
 
         div.addEventListener('touchend', clearTouchState, { passive: true });
 
         div.addEventListener('touchmove', () => {
-            // 如果手指移动了，视为滑动操作，取消长按判定
+            // Nếu ngón tay di chuyển, xem như đang vuốt, hủy bỏ việc tính nhấn giữ
             if (pressTimer) clearTimeout(pressTimer);
             hideTooltip();
-            // 重置标记，防止 isTouchAction 永久为 true 导致后续 mouseenter 被屏蔽
+            // Đặt lại cờ để tránh isTouchAction bị treo true vĩnh viễn gây chặn mouseenter sau này
             setTimeout(() => { isTouchAction = false; }, 500);
         }, { passive: true });
 
@@ -984,7 +984,7 @@ export function populateWhitelistManagementUI() {
     attachScrollListener(nonList);
     attachScrollListener(wlList);
 
-    // 容器级别兜底：鼠标离开列表区域时强制隐藏 tooltip
+    // Dự phòng mức khung chứa (Container level): Bắt buộc ẩn tooltip khi trỏ chuột thoát khỏi khu vực danh sách
     nonList.addEventListener('mouseleave', hideTooltip);
     wlList.addEventListener('mouseleave', hideTooltip);
 }
@@ -998,7 +998,7 @@ export function setupEventListeners() {
     bind(Constants.ID_COMBINED_BUTTONS_CHECKBOX, handleSettingsChange);
     bind(Constants.ID_UI_THEME_DROPDOWN, handleSettingsChange);
 
-    // --- 图标设置新界面监听 ---
+    // --- Lắng nghe giao diện cài đặt biểu tượng mới ---
     const sourceSelect = document.getElementById(Constants.ID_ICON_SOURCE_SELECT);
     const panelBuiltin = document.getElementById(Constants.ID_PANEL_BUILTIN);
     const panelCustom = document.getElementById(Constants.ID_PANEL_CUSTOM);
@@ -1013,7 +1013,7 @@ export function setupEventListeners() {
             const panelCharacter = document.getElementById(Constants.ID_PANEL_CHARACTER);
 
             if (isCustom) {
-                // 切换前保存当前内置图标快照（如果当前是内置图标模式）
+                // Lưu bản sao trạng thái biểu tượng tích hợp hiện tại (nếu đang ở chế độ biểu tượng tích hợp)
                 if (settings.iconType !== Constants.ICON_TYPES.CUSTOM && settings.iconType !== Constants.ICON_TYPES.CHARACTER_CARD) {
                     settings._builtinIconType = settings.iconType;
                 }
@@ -1022,14 +1022,14 @@ export function setupEventListeners() {
                 if (panelCharacter) panelCharacter.classList.remove('active');
                 settings.iconType = Constants.ICON_TYPES.CUSTOM;
 
-                // 自动选中第一个自定义图标（如果有且未选）
+                // Tự động chọn biểu tượng tùy chỉnh đầu tiên (nếu có và chưa chọn)
                 if (!settings.customIconUrl && settings.savedCustomIcons?.length > 0) {
                     settings.customIconUrl = settings.savedCustomIcons[0].url;
                     const dd = document.getElementById(Constants.ID_CUSTOM_DROPDOWN);
                     if(dd) dd.value = settings.customIconUrl;
                 }
             } else if (isCharacter) {
-                // 切换前保存当前内置图标快照（如果当前是内置图标模式）
+                // Lưu bản sao trạng thái biểu tượng tích hợp hiện tại (nếu đang ở chế độ biểu tượng tích hợp)
                 if (settings.iconType !== Constants.ICON_TYPES.CUSTOM && settings.iconType !== Constants.ICON_TYPES.CHARACTER_CARD) {
                     settings._builtinIconType = settings.iconType;
                 }
@@ -1043,7 +1043,7 @@ export function setupEventListeners() {
                 panelCustom.classList.remove('active');
                 if (panelCharacter) panelCharacter.classList.remove('active');
 
-                // 从保存的快照恢复内置图标类型
+                // Khôi phục biểu tượng tích hợp từ bản sao đã lưu
                 settings.iconType = settings._builtinIconType || Constants.ICON_TYPES.STAR;
             }
             saveSettings();
@@ -1062,18 +1062,18 @@ export function setupEventListeners() {
     const btnAdd = document.getElementById(Constants.ID_BTN_ADD_CUSTOM);
     if (btnAdd) btnAdd.onclick = openAddModal;
 
-    // 移除旧的白名单按钮监听 (ID_WHITELIST_BUTTON 已不存在)
+    // Xóa trình lắng nghe nút danh sách trắng (ID_WHITELIST_BUTTON) cũ do không còn tồn tại
 
-    // 白名单 TAB 点击事件
+    // Sự kiện khi click vào TAB Danh sách trắng
     const wlTab = document.getElementById(Constants.ID_TAB_WHITELIST);
     if (wlTab) {
         wlTab.addEventListener('click', () => {
-            // 切换到白名单页面时刷新数据
+            // Làm mới lại dữ liệu khi chuyển qua trang danh sách trắng
             populateWhitelistManagementUI();
         });
     }
 
-    // 使用说明按钮点击事件
+    // Sự kiện khi click vào nút Hướng dẫn sử dụng
     const helpBtn = document.getElementById(Constants.ID_BTN_OPEN_HELP);
     if (helpBtn) {
         helpBtn.onclick = () => {
@@ -1081,7 +1081,7 @@ export function setupEventListeners() {
         };
     }
 
-    // 排序设置按钮点击事件
+    // Sự kiện khi click vào nút Sắp xếp cài đặt
     const sortBtn = document.getElementById(Constants.ID_BTN_OPEN_SORT);
     if (sortBtn) {
         sortBtn.onclick = () => {
@@ -1089,7 +1089,7 @@ export function setupEventListeners() {
         };
     }
 
-    // (已移除局部 updateGliderPosition 定义)
+    // (Đã xóa định nghĩa updateGliderPosition cục bộ)
 
     const tabs = document.querySelectorAll('.qr-settings-tab-item');
     tabs.forEach(tab => {
@@ -1098,7 +1098,7 @@ export function setupEventListeners() {
             const currentTab = e.currentTarget;
             currentTab.classList.add('active');
 
-            // 移动滑块 (调用导出函数)
+            // Di chuyển thanh trượt (Gọi hàm export)
             updateTabGliderState();
 
             const pages = document.querySelectorAll('.qr-settings-page');
@@ -1119,48 +1119,48 @@ export function setupEventListeners() {
         });
     }
 
-    // 更新按钮监听
+    // Lắng nghe nút cập nhật
     const btnUpdate = document.getElementById(Constants.ID_BTN_CHECK_UPDATE);
     if (btnUpdate) {
         btnUpdate.onclick = async (e) => {
-            // 防止冒泡导致折叠面板
+            // Chặn sự kiện nhấp lan (bubbling) gây đóng bảng 
             e.stopPropagation();
             const btn = document.getElementById(Constants.ID_BTN_CHECK_UPDATE);
-            // 如果已经是红色状态(有更新)，点击则弹出日志
+            // Nếu nút đang báo đỏ (có bản cập nhật), ấn vào sẽ hiện popup cập nhật
             if (btn.classList.contains('has-update')) {
                 showUpdateModal();
             } else {
-                // 否则强制检查
-                btn.textContent = translate("检测中...", 'qra_checking');
+                // Ngược lại thì quét lại trạng thái
+                btn.textContent = translate("Đang kiểm tra...", 'qra_checking');
                 await refreshUpdateUI(true);
                 const isUpdated = btn.classList.contains('has-update');
-                if (!isUpdated) btn.textContent = translate("已是最新", 'qra_up_to_date');
+                if (!isUpdated) btn.textContent = translate("Đã là bản mới nhất", 'qra_up_to_date');
             }
         };
     }
 
     // ============================================================
-    // 防止操作弹窗时导致背后的 ST 扩展面板关闭
+    // Tránh việc nhấn trong popup làm tắt ngầm bảng cài đặt extension của ST
     // ============================================================
     const overlay = document.getElementById(Constants.ID_MODAL_OVERLAY);
     if (overlay) {
-        // 定义一个阻止冒泡的函数
+        // Viết hàm cản sự kiện nổi bọt
         const stopPropagation = (e) => {
             e.stopPropagation();
         };
 
-        // SillyTavern 在 script.js 中监听的是 'touchstart' 和 'mousedown'
-        // 我们需要在这些事件到达 html 之前在 overlay 层将其截断
+        // SillyTavern trong tệp script.js đang lắng nghe các sự kiện 'touchstart' và 'mousedown'
+        // Chúng ta cần đánh chặn chúng ngay trên overlay trước khi chúng chọc qua thẻ html
         overlay.addEventListener('mousedown', stopPropagation);
         overlay.addEventListener('touchstart', stopPropagation);
         overlay.addEventListener('click', stopPropagation);
 
-        // 同样阻止滚轮事件冒泡，防止滚动弹窗列表时误触（可选，但推荐）
+        // Chặn luồng con lăn cũng thế để khỏi dính (có thể không quá cần thiết nhưng tốt)
         overlay.addEventListener('wheel', stopPropagation, { passive: true });
     }
     // ============================================================
 
-    // 绑定设置项帮助图标点击事件
+    // Bắt sự kiện bấm vào các dấu chấm hỏi nhỏ
     const settingHelpIcons = document.querySelectorAll('.qr-setting-help-icon');
     settingHelpIcons.forEach(icon => {
         icon.addEventListener('click', (e) => {
@@ -1170,7 +1170,7 @@ export function setupEventListeners() {
         });
     });
 
-    // 白名单页面说明区域 - "不再显示"按钮逻辑
+    // Phần giải thích trong Danh sách trắng - Logic nút "Đừng hiện lại"
     const btnDismissHelp = document.getElementById(Constants.ID_BTN_DISMISS_WHITELIST_HELP);
     if (btnDismissHelp) {
         btnDismissHelp.onclick = () => {
@@ -1183,10 +1183,10 @@ export function setupEventListeners() {
         };
     }
 
-    // 初始化日志设置
+    // Khởi tạo các thiết đặt cho Logs
     initLogSettings();
 
-    // 头像旋转开关事件
+    // Sự kiện nút bật/tắt xoay ảnh đại diện
     const toggleAvatarRotation = document.getElementById('qr-toggle-avatar-rotation');
     if (toggleAvatarRotation) {
         toggleAvatarRotation.addEventListener('change', (e) => {
@@ -1196,7 +1196,7 @@ export function setupEventListeners() {
         });
     }
 
-    // 监听原生 QR v2 合并开关的改动，实现反向双向同步
+    // Bắt sự kiện gốc từ nút Gộp của QRv2 để thực hiện đồng bộ hai chiều
     document.body.addEventListener('change', (e) => {
         if (e.target && e.target.id === 'qr--isCombined') {
             const combinedCheck = document.getElementById(Constants.ID_COMBINED_BUTTONS_CHECKBOX);
@@ -1207,29 +1207,29 @@ export function setupEventListeners() {
     });
 }
 
-// 应用主题样式类到 body (互斥管理)
+// Chèn nhóm thẻ theme xuống thẳng thẻ body
 export function applyThemeStyles() {
     const settings = window.SillyTavern.getContext().extensionSettings[Constants.EXTENSION_NAME];
     const theme = settings.uiTheme || Constants.UI_THEMES.LIGHT;
 
-    // 1. 获取所有已知的主题类名列表
+    // 1. Phác thảo bộ danh sách các tên chủ đề đã biết
     const allThemeClasses = Object.values(Constants.UI_THEMES).filter(t => t !== 'light' && t !== 'system');
-    // 添加 system 的特殊映射类名（如果我们在 CSS 中给它定义了类名的话，这里使用了变量覆盖，但保持统一性也行）
+    // Gắn thủ công một thẻ lớp system giả
     allThemeClasses.push('qra-theme-system');
 
-    // 2. 清理所有主题类名
+    // 2. Chùi sạch lớp nền chủ đề cũ
     document.body.classList.remove(...allThemeClasses);
 
-    // 3. 添加当前选中的主题类名
+    // 3. Trát lại lớp nền vừa mới chọn
     if (theme === Constants.UI_THEMES.SYSTEM) {
         document.body.classList.add('qra-theme-system');
     } else if (theme !== Constants.UI_THEMES.LIGHT) {
-        // Light 模式使用 CSS 中的 :root 或默认值，不需要添加类
+        // Chế độ sáng (Light) dùng cấu hình :root trong CSS làm mặc định, không cần thêm class
         document.body.classList.add(theme);
     }
 }
 
-// --- 预览更新辅助函数 ---
+// --- Hàm chức năng nháp hỗ trợ xem trước cho UI ---
 export function updateBuiltinPreview(type) {
     const el = document.getElementById(Constants.ID_BUILTIN_PREVIEW);
     if(!el) return;
@@ -1246,16 +1246,16 @@ export function updateBuiltinPreview(type) {
         }
     }
 
-    el.innerHTML = `<i class="fa-solid ${iconClass}" style="${sizeStyle}"></i><span class="qr-icon-preview-label" data-i18n="qra_label_preview">预览</span>`;
+    el.innerHTML = `<i class="fa-solid ${iconClass}" style="${sizeStyle}"></i><span class="qr-icon-preview-label" data-i18n="qra_label_preview">Xem trước</span>`;
 }
 
 function updateCustomPreview(url) {
     const el = document.getElementById(Constants.ID_CUSTOM_PREVIEW);
     if(!el) return;
     if (url) {
-        el.innerHTML = `<img src="${url}"><span class="qr-icon-preview-label" data-i18n="qra_label_preview">预览</span>`;
+        el.innerHTML = `<img src="${url}"><span class="qr-icon-preview-label" data-i18n="qra_label_preview">Xem trước</span>`;
     } else {
-        el.innerHTML = `<span data-i18n="qra_custom_no_icon">无</span><span class="qr-icon-preview-label" data-i18n="qra_label_preview">预览</span>`;
+        el.innerHTML = `<span data-i18n="qra_custom_no_icon">Không có</span><span class="qr-icon-preview-label" data-i18n="qra_label_preview">Xem trước</span>`;
     }
 }
 
@@ -1264,54 +1264,54 @@ export function updateCharacterPreview() {
     if (!el) return;
     const avatarImg = document.querySelector("#avatar_load_preview");
     if (avatarImg && avatarImg.src) {
-        el.innerHTML = `<img src="${avatarImg.src}" class="qr-character-preview-avatar"><span class="qr-icon-preview-label" data-i18n="qra_label_preview">预览</span>`;
+        el.innerHTML = `<img src="${avatarImg.src}" class="qr-character-preview-avatar"><span class="qr-icon-preview-label" data-i18n="qra_label_preview">Xem trước</span>`;
     } else {
-        el.innerHTML = `<span data-i18n="qra_char_no_avatar">无角色头像</span><span class="qr-icon-preview-label" data-i18n="qra_label_preview">预览</span>`;
+        el.innerHTML = `<span data-i18n="qra_char_no_avatar">Không có ảnh nhân vật</span><span class="qr-icon-preview-label" data-i18n="qra_label_preview">Xem trước</span>`;
     }
 }
 
-// --- 弹窗逻辑 ---
+// --- Hàm tạo cửa sổ chức năng dạng Modal ---
 function openManageModal() {
     const settings = window.SillyTavern.getContext().extensionSettings[Constants.EXTENSION_NAME];
     const overlay = document.getElementById(Constants.ID_MODAL_OVERLAY);
 
-    // 渲染管理列表
+    // Xử lý tạo hình mảng mục quản lý
     overlay.innerHTML = createManageModalHtml(settings.savedCustomIcons);
     overlay.classList.add('visible');
 
-    // 关闭按钮
+    // Móc sự kiện đính lên phím đóng
     document.getElementById(Constants.ID_BTN_CLOSE_MANAGE).onclick = () => {
         overlay.classList.remove('visible');
-        refreshCustomDropdown(); // 关闭时刷新一下外面的下拉框
+        refreshCustomDropdown(); // Vừa tắt vừa làm mới thả xuống bên ngoài cho chắc
     };
 
-    // --- 删除逻辑 ---
+    // --- Khối xóa ---
     window.quickReplyMenu.deleteIcon = (index) => {
-        if(!confirm(translate('确定删除这个图标吗？', 'qra_confirm_delete_icon'))) return;
+        if(!confirm(translate('Bạn có chắc chắn muốn xóa biểu tượng này không?', 'qra_confirm_delete_icon'))) return;
 
-        // 如果删除的是当前正在使用的图标，重置为默认
+        // Nếu xui rủi biểu tượng đang xóa chính là thứ đang gắn, thì đưa tất cả về số không
         const deletedUrl = settings.savedCustomIcons[index].url;
         if (settings.customIconUrl === deletedUrl) {
             settings.customIconUrl = '';
-            // 可选：重置为星标
+            // Nhập nhằng: Đưa lại về hình ngôi sao
             // settings.iconType = Constants.ICON_TYPES.STAR;
             updateIconDisplay();
         }
 
         settings.savedCustomIcons.splice(index, 1);
         saveSettings();
-        openManageModal(); // 重新渲染列表
+        openManageModal(); // Vẽ lại giao diện quản lý
     };
 
-    // --- 编辑逻辑 ---
+    // --- Khối sửa đổi ---
     window.quickReplyMenu.editIcon = (index) => {
         const icon = settings.savedCustomIcons[index];
         if (!icon) return;
 
-        // 1. 渲染编辑界面覆盖当前弹窗
+        // 1. Phết giao diện bảng sửa đổi chồng qua
         overlay.innerHTML = createEditModalHtml(icon);
 
-        // 2. 绑定预览逻辑 (与新增逻辑一致)
+        // 2. Chế tạo cái màn hình chiếu thử (y xì như mục thêm)
         const inputUrl = document.getElementById(Constants.ID_INPUT_ADD_URL);
         const inputSize = document.getElementById(Constants.ID_INPUT_ADD_SIZE);
         const previewBox = document.getElementById(Constants.ID_PREVIEW_ADD);
@@ -1326,42 +1326,42 @@ function openManageModal() {
         inputUrl.addEventListener('input', updatePreview);
         inputSize.addEventListener('input', updatePreview);
 
-        // 3. 绑定"返回"按钮 (回到管理列表)
+        // 3. Phím "Trở lại" (lui lại list)
         document.getElementById('qr-btn-cancel-edit').onclick = () => {
             openManageModal();
         };
 
-        // 4. 绑定"保存"按钮
+        // 4. Phím "Bảo tồn" cấu trúc (Lưu)
         document.getElementById('qr-btn-save-edit').onclick = () => {
             const newName = document.getElementById(Constants.ID_INPUT_ADD_NAME).value.trim();
             const newUrl = inputUrl.value.trim();
             const newSize = inputSize.value;
 
             if (newName && newUrl) {
-                // 更新数据
+                // Nhồi dữ liệu mới
                 settings.savedCustomIcons[index] = {
                     name: newName,
                     url: newUrl,
                     size: newSize
                 };
 
-                // 如果修改的是当前正在使用的图标，需要实时更新主界面
-                // 只要 URL 没变，或者 URL 变了且等于当前选中的 URL (这句逻辑主要是为了覆盖 url 修改的情况)
+                // Trái đắng: Đổi đúng cái icon đang gắn thì phải cho hiển thị cập nhật chớp mắt
+                // Chừng nào mã URL y đúc cũ, hoặc URL nắn lại nhưng khớp với chuỗi chọn hiện thời
                 if (settings.iconType === Constants.ICON_TYPES.CUSTOM) {
-                     // 简单粗暴：如果 URL 匹配旧的，更新为新的
+                     // Nhanh gọn: Nếu url vẫn bám theo link cũ, quăng cho mớ chuỗi vừa nhúng mới
                      if (settings.customIconUrl === icon.url) {
                          settings.customIconUrl = newUrl;
                      }
-                     // 无论如何，只要是自定义模式，都触发一次图标刷新，确保 Size 变化被应用
+                     // Trăm sự nhờ cậy: Cứ hễ bật cờ Custom là cho quét lại icon lần nữa để bắt chuẩn size
                      if (settings.customIconUrl === newUrl) {
                          updateIconDisplay();
                      }
                 }
 
                 saveSettings();
-                openManageModal(); // 保存后回到管理列表
+                openManageModal(); // Sửa xong thì quay trở lại list
             } else {
-                alert(translate("名称和链接不能为空", 'qra_alert_name_url_required'));
+                alert(translate("Tên và đường dẫn liên kết không được phép để trống.", 'qra_alert_name_url_required'));
             }
         };
     };
@@ -1377,28 +1377,28 @@ function openAddModal() {
     const inputSize = document.getElementById(Constants.ID_INPUT_ADD_SIZE);
     const preview = document.getElementById(Constants.ID_PREVIEW_ADD);
 
-    // 封装更新预览函数
+    // Hàm bao chép việc chiếu trước ảnh
     const updatePreview = () => {
         const url = inputUrl.value.trim();
         const size = inputSize.value || '1.2';
         if (url) {
             preview.innerHTML = `<img src="${url}" style="max-width:80%; max-height:80%; height: ${size}em;">`;
         } else {
-            preview.innerHTML = '<span>Wait...</span>';
+            preview.innerHTML = '<span>Đang tải...</span>';
         }
     };
 
-    // 实时预览监听
+    // Theo dõi và gắn ảnh chớp nhoáng
     inputUrl.addEventListener('input', updatePreview);
     inputSize.addEventListener('input', updatePreview);
 
     document.getElementById(Constants.ID_BTN_SAVE_NEW).onclick = () => {
         const url = inputUrl.value.trim();
-        const name = inputName.value.trim() || translate('未命名图标', 'qra_unnamed_icon');
+        const name = inputName.value.trim() || translate('Biểu tượng chưa đặt tên', 'qra_unnamed_icon');
         const size = inputSize.value || '1.2';
 
         if (!url) {
-            alert(translate('请输入图标链接', 'qra_alert_url_required'));
+            alert(translate('Xin vui lòng điền URL của biểu tượng.', 'qra_alert_url_required'));
             return;
         }
 
@@ -1413,7 +1413,7 @@ function openAddModal() {
         overlay.classList.remove('visible');
 
         refreshCustomDropdown();
-        // 切换下拉框并触发事件
+        // Nhảy đến bảng menu chọn luôn và gọi bắt chớp hàm change
         const select = document.getElementById(Constants.ID_ICON_SOURCE_SELECT);
         if(select) {
             select.value = 'custom';
@@ -1427,7 +1427,7 @@ function refreshCustomDropdown() {
     const dd = document.getElementById(Constants.ID_CUSTOM_DROPDOWN);
     if (!dd) return;
 
-    dd.innerHTML = `<option value="">${translate('-- 请选择 --', 'qra_custom_select')}</option>`;
+    dd.innerHTML = `<option value="">${translate('-- Chọn --', 'qra_custom_select')}</option>`;
     if (settings.savedCustomIcons) {
         settings.savedCustomIcons.forEach(icon => {
             const opt = document.createElement('option');
@@ -1440,12 +1440,12 @@ function refreshCustomDropdown() {
     updateCustomPreview(dd.value);
 }
 
-// 独立的 Modal Overlay HTML，用于注入到 body
+// HTML rời của Modal Overlay (màn đen lót lưng) chỉ rình để đâm thẳng vào body
 export function createModalOverlayHtml() {
     return `<div id="${Constants.ID_MODAL_OVERLAY}" class="qr-modal-overlay"></div>`;
 }
 
-// --- 使用说明弹窗逻辑 ---
+// --- Cụm logic bung Bảng Hướng dẫn chỉ thị ---
 
 function createHelpModalHtml() {
     const lang = getCurrentLocale();
@@ -1453,36 +1453,36 @@ function createHelpModalHtml() {
 
     return `
     <div class="qr-modal-box qr-help-mode" id="${Constants.ID_MODAL_HELP}">
-        <!-- 1. 头部 -->
+        <!-- 1. Đầu trang -->
         <div class="qr-help-header">
             <div class="qr-help-header-left">
-                <button class="qr-help-sidebar-toggle" id="${Constants.ID_BTN_TOGGLE_SIDEBAR}" title="${translate('目录', 'qra_title_toc')}">
+                <button class="qr-help-sidebar-toggle" id="${Constants.ID_BTN_TOGGLE_SIDEBAR}" title="${translate('Mục lục', 'qra_title_toc')}">
                     <i class="fa-solid fa-bars"></i>
                 </button>
-                <span data-i18n="qra_help_title">QR助手 使用说明</span>
+                <span data-i18n="qra_help_title">Hướng dẫn sử dụng QR Assistant</span>
             </div>
             <button class="qr-help-close-btn" onclick="document.getElementById('${Constants.ID_MODAL_OVERLAY}').classList.remove('visible')">
                 <i class="fa-solid fa-xmark"></i>
             </button>
         </div>
 
-        <!-- 2. 双栏布局区 -->
+        <!-- 2. Phần phân chia luồng khung nhìn hai nhánh -->
         <div class="qr-help-split-layout">
-            <!-- 左侧目录 -->
+            <!-- Mục lục trái tim -->
             <div class="qr-help-sidebar">
-                <div class="qr-toc-item active" data-target="help-video" data-i18n="qra_help_toc_video">视频示例</div>
-                <div class="qr-toc-item" data-target="help-core" data-i18n="qra_help_toc_core">核心功能</div>
-                <div class="qr-toc-item" data-target="help-detail" data-i18n="qra_help_toc_detail">具体功能</div>
-                <div class="qr-toc-item sub" data-target="help-whitelist" data-i18n="qra_help_toc_whitelist">白名单</div>
-                <div class="qr-toc-item sub" data-target="help-icons" data-i18n="qra_help_toc_icons">按钮图标</div>
-                <div class="qr-toc-item sub" data-target="help-theme" data-i18n="qra_help_toc_theme">UI 主题</div>
-                <div class="qr-toc-item sub" data-target="help-sort" data-i18n="qra_help_toc_sort">菜单按钮排序</div>
-                <div class="qr-toc-item sub" data-target="help-others" data-i18n="qra_help_toc_others">其他功能</div>
-                <div class="qr-toc-item sub" data-target="help-compat" data-i18n="qra_help_toc_compat">兼容其他插件</div>
-                <div class="qr-toc-item sub" data-target="help-update" data-i18n="qra_help_toc_update">检测更新</div>
+                <div class="qr-toc-item active" data-target="help-video" data-i18n="qra_help_toc_video">Đoạn phim ví dụ</div>
+                <div class="qr-toc-item" data-target="help-core" data-i18n="qra_help_toc_core">Cốt lõi chức năng</div>
+                <div class="qr-toc-item" data-target="help-detail" data-i18n="qra_help_toc_detail">Chi tiết năng lực</div>
+                <div class="qr-toc-item sub" data-target="help-whitelist" data-i18n="qra_help_toc_whitelist">Vùng danh sách trắng</div>
+                <div class="qr-toc-item sub" data-target="help-icons" data-i18n="qra_help_toc_icons">Hệ thống Biểu tượng</div>
+                <div class="qr-toc-item sub" data-target="help-theme" data-i18n="qra_help_toc_theme">Tạo hình khung áo (Theme)</div>
+                <div class="qr-toc-item sub" data-target="help-sort" data-i18n="qra_help_toc_sort">Thứ tự nút Menu</div>
+                <div class="qr-toc-item sub" data-target="help-others" data-i18n="qra_help_toc_others">Lặt vặt chức năng</div>
+                <div class="qr-toc-item sub" data-target="help-compat" data-i18n="qra_help_toc_compat">Hỗ trợ qua lại ứng dụng bên thứ 3</div>
+                <div class="qr-toc-item sub" data-target="help-update" data-i18n="qra_help_toc_update">Trinh sát bản mới</div>
             </div>
 
-            <!-- 右侧正文 -->
+            <!-- Bài viết phải nhịp -->
             <div class="qr-help-content" id="qr-help-scroll-view">
                 ${content}
             </div>
@@ -1501,12 +1501,12 @@ function openHelpModal() {
     const sidebar = overlay.querySelector('.qr-help-sidebar');
     const toggleBtn = document.getElementById(Constants.ID_BTN_TOGGLE_SIDEBAR);
 
-    // 绑定侧边栏收缩/展开按钮
+    // Móc cần phím rút-tung ra của viền hông
     if (toggleBtn && splitLayout) {
         toggleBtn.addEventListener('click', () => {
             splitLayout.classList.toggle('qr-sidebar-open');
         });
-        // 点击正文区域关闭侧边栏（移动端）
+        // Ấn lọt xuống nền bài viết tự bóp gọn gàng lại hông viền (Đối phó UI ĐTDĐ)
         const content = overlay.querySelector('.qr-help-content');
         if (content) {
             content.addEventListener('click', () => {
@@ -1515,34 +1515,34 @@ function openHelpModal() {
         }
     }
 
-    // 绑定目录点击事件
+    // Móc cần phím click nhắm mục lục
     const items = overlay.querySelectorAll('.qr-toc-item');
     const scrollView = document.getElementById('qr-help-scroll-view');
 
     items.forEach(item => {
         item.addEventListener('click', () => {
-            // 切换高亮
+            // Chuyển màu bôi sáng
             items.forEach(i => i.classList.remove('active'));
             item.classList.add('active');
 
-            // 滚动定位
+            // Bắn tầm nhìn cuộn thẳng đến chỗ
             const targetId = item.getAttribute('data-target');
             const targetEl = document.getElementById(targetId);
             if (targetEl && scrollView) {
-                // 使用 scrollIntoView 或 scrollTop 计算
-                // 这里减去 20px 留一点顶部间隙
+                // Nhờ scrollIntoView hoặc đo tọa độ thủ công
+                // Đóng bớt 20px nhằm thả thưa tầm trần nhìn trên cao
                 const topPos = targetEl.offsetTop - scrollView.offsetTop;
                 scrollView.scrollTo({ top: topPos, behavior: 'smooth' });
             }
 
-            // 移动端点击目录项后自动关闭侧边栏
+            // Giao diện ĐTDĐ ấn xong phải tự bóp lại
             if (splitLayout) {
                 splitLayout.classList.remove('qr-sidebar-open');
             }
         });
     });
 
-    // 滚动联动：滚动正文时自动高亮对应的目录项
+    // Bắt lăn chuột: tự theo dõi tọa độ cuộn màn rồi đẩy lùi chấm đèn bên cột trái mục lục
     if (scrollView) {
         scrollView.addEventListener('scroll', () => {
             const scrollTop = scrollView.scrollTop;
@@ -1551,7 +1551,7 @@ function openHelpModal() {
                 return el ? { item, offsetTop: el.offsetTop - scrollView.offsetTop } : null;
             }).filter(Boolean);
 
-            // 找到当前滚动位置对应的最后一个可见章节
+            // Truy tìm xem mảnh miếng nào trên mặt đang ôm điểm cuộn gần nhất
             let activeItem = targets[0]?.item;
             for (const t of targets) {
                 if (scrollTop >= t.offsetTop - 20) {
@@ -1567,30 +1567,30 @@ function openHelpModal() {
     }
 }
 
-// --- 更新日志弹窗 ---
+// --- Cụm bảng hiện Log mới cập nhật của Extension ---
 function createChangelogModalHtml(changelogText) {
     return `
     <div class="qr-modal-box" id="${Constants.ID_MODAL_UPDATE}">
-        <div class="qr-modal-header" data-i18n="qra_modal_update_title">插件更新日志</div>
+        <div class="qr-modal-header" data-i18n="qra_modal_update_title">Nhật ký cập nhật tiện ích</div>
         <div class="qr-changelog-viewer" id="${Constants.ID_CHANGELOG_CONTENT}">${changelogText}</div>
-        <div class="qr-update-tip" data-i18n="qra_update_tip">如果更新失败，可以在酒馆扩展页面的【管理扩展程序】列表中手动更新QR助手。如果依然更新失败，则可以尝试删除重装来使用最新版本插件。</div>
+        <div class="qr-update-tip" data-i18n="qra_update_tip">Trường hợp cập nhật không thông qua, các bạn hãy vào phần [Tiện ích mở rộng] và bấm nút cập nhật thủ công cho bảng QR Assistant. Vẫn không thành công xin cứ xóa và tự lên kho tải dội ngược cài lại từ đầu cho sạch.</div>
         <div class="qr-modal-footer">
-            <button id="${Constants.ID_BTN_CONFIRM_UPDATE}" class="menu_button primary" data-i18n="qra_btn_update_now">立即更新</button>
-            <button class="menu_button" onclick="document.getElementById('${Constants.ID_MODAL_OVERLAY}').classList.remove('visible')" data-i18n="qra_btn_cancel">取消</button>
+            <button id="${Constants.ID_BTN_CONFIRM_UPDATE}" class="menu_button primary" data-i18n="qra_btn_update_now">Mở tiến trình Cập nhật</button>
+            <button class="menu_button" onclick="document.getElementById('${Constants.ID_MODAL_OVERLAY}').classList.remove('visible')" data-i18n="qra_btn_cancel">Hủy lệnh</button>
         </div>
     </div>`;
 }
 
 async function showUpdateModal() {
     const overlay = document.getElementById(Constants.ID_MODAL_OVERLAY);
-    // 先显示 Loading
-    overlay.innerHTML = `<div class="qr-modal-box" style="text-align:center; padding:30px;">${translate("Loading changelog...", 'qra_loading_changelog')}</div>`;
+    // Bơm trước Loading che màn
+    overlay.innerHTML = `<div class="qr-modal-box" style="text-align:center; padding:30px;">${translate("Đang nạp dữ liệu nhật ký...", 'qra_loading_changelog')}</div>`;
     overlay.classList.add('visible');
 
     const changelog = await getChangelog();
 
-    // 简单的 Markdown 渲染 (只处理换行和简单的标题，或者直接依赖 ST 的 markdown 渲染器如果可用)
-    // 这里简单转义 HTML 即可，保持纯文本显示最稳妥，或者简单替换换行
+    // Rải sương sương Markdown nháp tránh lỗi XSS cơ bản do lọt thỏm HTML (Hoặc mượn trình Markdown có sẵn của ST nếu rảnh)
+    // Tạm chêm thoát thẻ góc cho yên bụng
     const safeLog = changelog.replace(/</g, "&lt;").replace(/>/g, "&gt;");
 
     overlay.innerHTML = createChangelogModalHtml(safeLog);
@@ -1598,20 +1598,20 @@ async function showUpdateModal() {
     const btnUpdate = document.getElementById(Constants.ID_BTN_CONFIRM_UPDATE);
     if (btnUpdate) {
         btnUpdate.onclick = async () => {
-            if (confirm(translate('更新操作将刷新页面，请确保已保存对话。\n确定更新吗？', 'qra_confirm_update'))) {
+            if (confirm(translate('Thao tác Cập nhật đồng nghĩa với việc F5 lại tải nguyên trang, bạn hãy chắc chắn rằng khung hội thoại đã được lưu.\nBạn chắc chắn chứ?', 'qra_confirm_update'))) {
                 btnUpdate.disabled = true;
-                btnUpdate.textContent = translate("更新中...", 'qra_checking');
+                btnUpdate.textContent = translate("Đang khởi động cập nhật...", 'qra_checking');
                 try {
                     const res = await performUpdate();
                     if (res.ok) {
-                        alert(translate('更新指令已发送，页面即将刷新。', 'qra_alert_update_sent'));
+                        alert(translate('Thư báo lệnh Cập nhật đã bắn đi thành công. Trang sẽ F5 sau vài tích tắc.', 'qra_alert_update_sent'));
                         setTimeout(() => location.reload(), 2000);
                     } else {
-                        alert(translate('更新失败，请查看控制台日志。', 'qra_alert_update_failed'));
+                        alert(translate('Lệnh Cập nhật ngã ngựa, vui lòng bật bảng devtools F12 rà soát lại thông tin.', 'qra_alert_update_failed'));
                         btnUpdate.disabled = false;
                     }
                 } catch (e) {
-                    alert(translate('更新请求发生错误: ', 'qra_alert_update_error') + e);
+                    alert(translate('Có lỗi bất thường xảy ra trong quá trình nổ máy yêu cầu Cập nhật: ', 'qra_alert_update_error') + e);
                     btnUpdate.disabled = false;
                 }
             }
@@ -1619,26 +1619,26 @@ async function showUpdateModal() {
     }
 }
 
-// 更新 UI 状态
+// Bơm tải trinh sát làm mới hiện trạng cho UI Cập nhật
 export async function refreshUpdateUI(force = false) {
     const btn = document.getElementById(Constants.ID_BTN_CHECK_UPDATE);
     const verDisplay = document.getElementById(Constants.ID_VERSION_DISPLAY);
     
-    // 如果是强制检查，先显示 Loading 状态
-    if (force && verDisplay) verDisplay.textContent = translate("检测中...", 'qra_checking');
+    // Nếu bị áp ép truy xét, cứ đưa ra chữ Đang chạy đi
+    if (force && verDisplay) verDisplay.textContent = translate("Đang kiểm tra...", 'qra_checking');
 
     const result = await checkForUpdates(force);
 
-    // 只要有结果返回，就优先更新版本号显示
+    // Có thư là phết con số Phiên bản cái rụp
     if (result && verDisplay) {
         verDisplay.textContent = result.localVersion || 'Unknown';
     }
 
-    // 接下来处理“是否有更新”的按钮状态
+    // Tiếp tuyến xử lý đèn chớp "Có bản mới à nghen"
     const badge = document.getElementById(Constants.ID_NEW_VERSION_BADGE);
     
     if (!result) {
-        // 极端情况：没有任何结果
+        // Dính biến cố: Không moi được tin
         if (verDisplay) verDisplay.textContent = "Error";
         return;
     }
@@ -1646,18 +1646,18 @@ export async function refreshUpdateUI(force = false) {
     if (result.hasUpdate) {
         if (badge) badge.classList.add('visible');
         if (btn) {
-            btn.textContent = translate("发现新版本", 'qra_new_version_found');
+            btn.textContent = translate("Đã dò thấy phiên bản mới", 'qra_new_version_found');
             btn.classList.add('has-update');
-            btn.title = `最新版本: ${result.latestVersion}`;
+            btn.title = `Phiên bản trần nhất: ${result.latestVersion}`;
         }
     } else {
         if (badge) badge.classList.remove('visible');
         if (btn) {
-            // 如果 remote 检查失败，显示提示
+            // Trường hợp truy vấn ra biển lớn khép cờ
             if (result.latestVersion === "Check Failed") {
-                btn.textContent = translate("检测失败", 'qra_check_failed');
+                btn.textContent = translate("Không dò thấy tín hiệu", 'qra_check_failed');
             } else {
-                btn.textContent = translate("检查更新", 'qra_btn_check_update');
+                btn.textContent = translate("Kiểm tra cập nhật", 'qra_btn_check_update');
             }
             btn.classList.remove('has-update');
             btn.removeAttribute('title');
@@ -1665,29 +1665,29 @@ export async function refreshUpdateUI(force = false) {
     }
 }
 
-// --- 日志面板功能 ---
+// --- Khối xử lý cho Bảng Ghi chép Log của riêng Extension ---
 
 /**
- * 生成日志弹窗的 HTML 结构
+ * Xương cốt HTML tạc Bảng nhật ký Log
  */
 function createLogModalHtml() {
     return `
     <div class="qr-modal-box" id="${Constants.ID_MODAL_LOG}" style="width: 800px; height: 80vh; max-height: 90vh;">
-        <!-- 修改点：添加 flex 布局样式，确保标题在左，按钮组在右 -->
+        <!-- Đảo ngược layout dùng Flex cắm nhãn lề trái, khay phím chắp cánh lề phải -->
         <div class="qr-modal-header" style="display: flex; justify-content: space-between; align-items: center;">
-            <span style="font-size: 16px; font-weight: bold;" data-i18n="qra_log_title">运行日志</span>
+            <span style="font-size: 16px; font-weight: bold;" data-i18n="qra_log_title">Bảng Theo Dõi Hoạt Động (Nhật ký)</span>
 
-            <!-- 右侧按钮组容器 -->
+            <!-- Tổ chứa phím chức năng cắm mặt dạt cánh phải -->
             <div style="display: flex; gap: 8px; align-items: center;">
-                <button id="${Constants.ID_BTN_COPY_LOG}" class="menu_button qr-log-header-btn" data-i18n="qra_btn_copy">复制</button>
-                <button id="${Constants.ID_BTN_DOWNLOAD_LOG}" class="menu_button qr-log-header-btn" data-i18n="qra_btn_download">下载</button>
-                <button id="${Constants.ID_BTN_CLEAR_LOG}" class="menu_button qr-log-header-btn" style="color: #d32f2f; border-color: rgba(211, 47, 47, 0.3);" data-i18n="qra_btn_clear">清空</button>
+                <button id="${Constants.ID_BTN_COPY_LOG}" class="menu_button qr-log-header-btn" data-i18n="qra_btn_copy">Chép khối</button>
+                <button id="${Constants.ID_BTN_DOWNLOAD_LOG}" class="menu_button qr-log-header-btn" data-i18n="qra_btn_download">Tải file</button>
+                <button id="${Constants.ID_BTN_CLEAR_LOG}" class="menu_button qr-log-header-btn" style="color: #d32f2f; border-color: rgba(211, 47, 47, 0.3);" data-i18n="qra_btn_clear">Tẩy trắng bóc</button>
 
-                <!-- 竖线分隔符 -->
+                <!-- Lằn phân chẻ khu mạn tàu -->
                 <div style="width: 1px; height: 18px; background: #ccc; margin: 0 6px;"></div>
 
-                <!-- 关闭按钮 -->
-                <button class="qr-help-close-btn" onclick="document.getElementById('${Constants.ID_MODAL_OVERLAY}').classList.remove('visible')" title="${translate('关闭', 'qra_title_close')}" style="height: 24px; width: 24px; display: flex; align-items: center; justify-content: center;">
+                <!-- Phím chốt sập -->
+                <button class="qr-help-close-btn" onclick="document.getElementById('${Constants.ID_MODAL_OVERLAY}').classList.remove('visible')" title="${translate('Đóng', 'qra_title_close')}" style="height: 24px; width: 24px; display: flex; align-items: center; justify-content: center;">
                     <i class="fa-solid fa-xmark" style="font-size: 18px;"></i>
                 </button>
             </div>
@@ -1698,15 +1698,15 @@ function createLogModalHtml() {
 }
 
 /**
- * 渲染日志内容到视图
+ * Phết kết cấu vẩy cọ nặn mã HTML Log lấp thẳng vùng chứa
  */
 function renderLogsToView(viewerElement) {
     if (!viewerElement) return;
 
-    // 获取当前设置的过滤等级
+    // Kéo cần gạt tìm cấp độ phễu lọc
     const filterLevel = Logger.currentLevel;
 
-    // 修改：先 filter 过滤符合等级的日志，再 map 生成 HTML
+    // Sửa nắn: Lội tìm bằng hàm filter hất đổ Log dưới cấp trước khi tuôn qua map tạo mảng mã HTML
     viewerElement.innerHTML = Logger.logs
         .filter(log => log.level >= filterLevel)
         .map(log => {
@@ -1728,24 +1728,24 @@ function renderLogsToView(viewerElement) {
             let dataPart = '';
             if (log.data) {
                 try {
-                    // 如果包含堆栈信息 (由 logger.js 处理过)，显示折叠面板
+                    // Nếu lõi ngầm mớ đống chuỗi Stack do lỗi tạo ra (đã bưng về bởi Logger), xòe bảng kẹp
                     if (log.data.stack) {
                         dataPart = `
                         <div style="margin-top: 4px; font-size: 0.85em; opacity: 0.8;">
                             <details>
-                                <summary style="cursor: pointer; text-decoration: underline;">${translate('查看错误堆栈 (Stack Trace)', 'qra_stack_trace')}</summary>
+                                <summary style="cursor: pointer; text-decoration: underline;">${translate('Hiển thị thông tin chuỗi chồng lỗi (Stack Trace)', 'qra_stack_trace')}</summary>
                                 <pre style="white-space: pre-wrap; word-break: break-all; background: rgba(0,0,0,0.1); padding: 5px; border-radius: 4px; margin-top: 5px; font-family: monospace;">${log.data.stack}</pre>
                             </details>
                         </div>`;
                     } else {
-                        // 普通对象，显示简短的 JSON
+                        // Thể thường quy thì tung chuỗi JSON ngắn
                         const jsonStr = JSON.stringify(log.data);
-                        // 截断太长的日志防止卡顿
+                        // Cắt cúp để khỏi lê thê
                         const displayStr = jsonStr.length > 200 ? jsonStr.substring(0, 200) + '...' : jsonStr;
                         dataPart = `<div style="margin-top: 2px; font-size: 0.85em; opacity: 0.7; font-family: monospace;">Data: ${displayStr}</div>`;
                     }
                 } catch (e) {
-                    dataPart = `<div style="color: red;">[Data Render Error]</div>`;
+                    dataPart = `<div style="color: red;">[Dữ liệu Log mắc lỗi hỏng hình]</div>`;
                 }
             }
 
@@ -1759,7 +1759,7 @@ function renderLogsToView(viewerElement) {
 }
 
 /**
- * 显示日志弹窗
+ * Đốt pháo thắp Bảng Log hiện thân
  */
 function showLogModal() {
     const overlay = document.getElementById(Constants.ID_MODAL_OVERLAY);
@@ -1771,13 +1771,13 @@ function showLogModal() {
     const viewer = document.getElementById(Constants.ID_LOG_VIEWER);
     renderLogsToView(viewer);
 
-    // 绑定事件
+    // Kéo khóa dây kiện phím bấm
     const btnCopy = document.getElementById(Constants.ID_BTN_COPY_LOG);
     if (btnCopy) {
         btnCopy.onclick = () => {
             navigator.clipboard.writeText(Logger.exportLogs()).then(() => {
                 const originalText = btnCopy.textContent;
-                btnCopy.textContent = translate('已复制!', 'qra_copied');
+                btnCopy.textContent = translate('Sao chép chót lọt!', 'qra_copied');
                 setTimeout(() => btnCopy.textContent = originalText, 1500);
             });
         };
@@ -1787,32 +1787,32 @@ function showLogModal() {
     if (btnDownload) {
         btnDownload.onclick = () => {
             try {
-                // 1. 生成 JSON 字符串 (格式化缩进为 2 空格)
+                // 1. Phết thành bãi chuỗi JSON (Khắc phục căn bằng nấc 2 khoảng trống lề)
                 const jsonContent = JSON.stringify(Logger.logs, null, 2);
 
-                // 2. 创建 application/json 类型的 Blob
+                // 2. Chế tạo hòn Blob với quy danh loại application/json
                 const blob = new Blob([jsonContent], { type: 'application/json' });
                 const url = URL.createObjectURL(blob);
 
-                // 3. 生成文件名: qr_helper_logs_2023-10-27T10-00-00.json
+                // 3. Đánh nhãn mác định dạng: qr_helper_logs_2023-10-27T10-00-00.json
                 const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
                 const filename = `qr_helper_logs_${timestamp}.json`;
 
-                // 4. 触发下载
+                // 4. Kéo lệnh Tải
                 const a = document.createElement('a');
                 a.href = url;
                 a.download = filename;
                 document.body.appendChild(a);
                 a.click();
 
-                // 5. 清理
+                // 5. Quét dọn tẩy vết
                 document.body.removeChild(a);
                 URL.revokeObjectURL(url);
 
-                Logger.info(LogCategory.SYSTEM, '日志已导出为 JSON 文件');
+                Logger.info(LogCategory.SYSTEM, 'Các chuỗi Log đã đúc khuôn kết tinh thành tệp JSON');
             } catch (e) {
-                Logger.error(LogCategory.SYSTEM, '导出日志失败', e);
-                toastr.error(translate('导出日志失败，请查看控制台', 'qra_toastr_export_failed'));
+                Logger.error(LogCategory.SYSTEM, 'Bất cẩn xảy ra trong tiến trình xuất Log', e);
+                toastr.error(translate('Sóng gió khi đúc tệp Log. Mở Console (F12) mà kiểm lỗi.', 'qra_toastr_export_failed'));
             }
         };
     }
@@ -1820,7 +1820,7 @@ function showLogModal() {
     const btnClear = document.getElementById(Constants.ID_BTN_CLEAR_LOG);
     if (btnClear) {
         btnClear.onclick = () => {
-            if (confirm(translate('确定清空所有日志吗？', 'qra_confirm_clear_logs'))) {
+            if (confirm(translate('Có xóa nhẵn nhụi bộ ghi chép Log không?', 'qra_confirm_clear_logs'))) {
                 Logger.clear();
                 renderLogsToView(viewer);
             }
@@ -1828,24 +1828,24 @@ function showLogModal() {
     }
 }
 
-// 初始化日志设置
+// Bơm nhiên liệu móc cắm chấu sự kiện của mục Log cài đặt
 function initLogSettings() {
     const logLevelSelect = document.getElementById('qr-log-level-select');
     if (logLevelSelect) {
         logLevelSelect.addEventListener('change', (e) => {
             const level = parseInt(e.target.value);
 
-            // 1. 设置运行时级别
+            // 1. Dập cần mức ranh nấc Log thời gian chạy
             Logger.setLevel(level);
 
-            // 2. 保存到持久化设置
+            // 2. Móc túi lưu cố định lại vào Settings
             const settings = window.SillyTavern.getContext().extensionSettings[Constants.EXTENSION_NAME];
             settings.logLevel = level;
             saveSettings();
 
-            Logger.info(LogCategory.SYSTEM, `日志级别已更新并保存为: ${e.target.options[e.target.selectedIndex].text}`);
+            Logger.info(LogCategory.SYSTEM, `Mực thủy triều của bộ lọc Log được đổi sang: ${e.target.options[e.target.selectedIndex].text}`);
 
-            // 如果日志弹窗当前是打开的，立即重新渲染以应用过滤
+            // Thừa thắng xông lên: Hễ cái khiên Bảng Log đang mở thì cập nhật lẹ tại trận
             const viewer = document.getElementById(Constants.ID_LOG_VIEWER);
             if (viewer && document.getElementById(Constants.ID_MODAL_LOG)) {
                 renderLogsToView(viewer);
@@ -1860,48 +1860,48 @@ function initLogSettings() {
         });
     }
 
-    // 设置面板直接下载日志
+    // Đẩy phím "Tải lẹ Log" ra thẳng màn ngoài của Panel Cài đặt
     const downloadLogsPanelBtn = document.getElementById('qr-download-logs-panel-btn');
     if (downloadLogsPanelBtn) {
         downloadLogsPanelBtn.addEventListener('click', () => {
             try {
-                // 1. 生成 JSON 字符串 (格式化缩进为 2 空格)
+                // 1. Phết thành bãi chuỗi JSON (Khắc phục căn bằng nấc 2 khoảng trống lề)
                 const jsonContent = JSON.stringify(Logger.logs, null, 2);
 
-                // 2. 创建 application/json 类型的 Blob
+                // 2. Chế tạo hòn Blob với quy danh loại application/json
                 const blob = new Blob([jsonContent], { type: 'application/json' });
                 const url = URL.createObjectURL(blob);
 
-                // 3. 生成文件名: qr_helper_logs_2023-10-27T10-00-00.json
+                // 3. Đánh nhãn mác định dạng: qr_helper_logs_2023-10-27T10-00-00.json
                 const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
                 const filename = `qr_helper_logs_${timestamp}.json`;
 
-                // 4. 触发下载
+                // 4. Kéo lệnh Tải
                 const a = document.createElement('a');
                 a.href = url;
                 a.download = filename;
                 document.body.appendChild(a);
                 a.click();
 
-                // 5. 清理
+                // 5. Quét dọn tẩy vết
                 document.body.removeChild(a);
                 URL.revokeObjectURL(url);
 
-                Logger.info(LogCategory.SYSTEM, '日志已导出为 JSON 文件');
+                Logger.info(LogCategory.SYSTEM, 'Các chuỗi Log đã đúc khuôn kết tinh thành tệp JSON');
             } catch (e) {
-                Logger.error(LogCategory.SYSTEM, '导出日志失败', e);
-                toastr.error(translate('导出日志失败，请查看控制台', 'qra_toastr_export_failed'));
+                Logger.error(LogCategory.SYSTEM, 'Bất cẩn xảy ra trong tiến trình xuất Log', e);
+                toastr.error(translate('Sóng gió khi đúc tệp Log. Mở Console (F12) mà kiểm lỗi.', 'qra_toastr_export_failed'));
             }
         });
     }
 }
 
-// 导出日志初始化函数供 setupEventListeners 调用
+// Hàm chia cành phơi dây dẫn mồi kiện thiết lập Log cho cụm setupEventListeners cắn vào 
 export function setupLogEventListeners() {
     initLogSettings();
 }
 
-// --- 排序管理弹窗与拖拽逻辑 ---
+// --- Cụm logic thao tác vuốt kéo - Sắp trật tự hàng Menu ---
 
 function createSortModalHtml(settings) {
     const isCustomChecked = settings.enableCustomSort ? 'checked' : '';
@@ -1909,38 +1909,38 @@ function createSortModalHtml(settings) {
     return `
         <div class="qr-modal-box" id="${Constants.ID_MODAL_SORT}" style="width: 500px; max-width: 95vw; position: relative;">
 
-            <!-- 内部子弹窗遮罩，样式完全复用设置说明弹窗 -->
+            <!-- Rập khuôn bóng con che màng của lớp Hướng dẫn UI để quăng cho khối Sắp xếp này dùng -->
             <div id="qr-sort-inner-overlay" style="display: none; position: absolute; inset: 0; background: rgba(0,0,0,0.5); border-radius: 12px; z-index: 50; align-items: center; justify-content: center; backdrop-filter: blur(2px);">
                 <div class="qr-modal-box" style="width: 450px; max-width: 90%;">
                     <div class="qr-modal-header" style="display: flex; justify-content: space-between; align-items: center;">
-                        <span data-i18n="qra_help_tooltip">查看详细说明</span>
-                        <button class="qr-help-close-btn" onclick="document.getElementById('qr-sort-inner-overlay').style.display='none'" title="关闭" data-i18n="[title]qra_title_close" style="color: #333 !important;">
+                        <span data-i18n="qra_help_tooltip">Lời nhắc chi tiết chỉ dẫn</span>
+                        <button class="qr-help-close-btn" onclick="document.getElementById('qr-sort-inner-overlay').style.display='none'" title="Đóng" data-i18n="[title]qra_title_close" style="color: #333 !important;">
                             <i class="fa-solid fa-xmark"></i>
                         </button>
                     </div>
-                    <div style="padding: 15px 10px; overflow-y: auto; max-height: 50vh; line-height: 1.6; font-size: 14px; white-space: pre-wrap; color: #333;" data-i18n="qra_sort_desc">此模式允许您自定义排列QR菜单上的按钮顺序。
-关闭时，QR菜单上的按钮将会自适应排列（默认模式）。
-开启时，将会根据以下方式的排列显示在QR菜单上，因此你可以自行拖拽以下分组按钮进行自定义排列。
+                    <div style="padding: 15px 10px; overflow-y: auto; max-height: 50vh; line-height: 1.6; font-size: 14px; white-space: pre-wrap; color: #333;" data-i18n="qra_sort_desc">Chế độ này cho phép bạn tùy chỉnh thứ tự các nút trên menu QR.
+Khi tắt, các nút trên menu QR sẽ tự động sắp xếp (chế độ mặc định).
+Khi bật, chúng sẽ hiển thị trên menu QR theo thứ tự dưới đây, vì vậy bạn có thể kéo thả các nhóm nút bên dưới để tự do sắp xếp.
 
-其中，半透明虚化的按钮表示是当前未启用的脚本/QR，而非半透明虚化的按钮则是表示当前已启用的脚本/QR。
+Trong đó, các nút làm mờ bán trong suốt là các script/QR hiện đang bị tắt, còn các nút không mờ là những nút đang được bật.
 
-它们在下方的顺序位置，就是您实际打开QR助手菜单面板看到的顺序（启用自定义排序模式）。
+Vị trí của chúng ở khu vực bên dưới chính là thứ tự bạn sẽ thấy khi mở menu của QR Assistant (khi chế độ sắp xếp tùy chỉnh được bật).
 
-而当半透明虚化的按钮在聊天中启用时，那么它就会按照下方区域的位置顺序，显示在QR助手的菜单面板中。
+Khi một nút mờ được bật trong chat, nó sẽ xuất hiện trong menu của QR Assistant theo đúng vị trí của nó ở khu vực bên dưới.
 
-此外，这个半透明虚化的按钮是可以移除。移除之后，如果该按钮启用时，它会默认显示在菜单面板的靠后位置。
+Ngoài ra, các nút làm mờ này có thể bị xóa đi. Sau khi xóa, nếu nút đó được bật lại, nó sẽ mặc định xuất hiện ở cuối menu.
 
-如果大家依然不能理解上方的描述，可以直接截图发给AI使其解释，或者在社区原贴询问。</div>
+Nếu bạn vẫn không hiểu mô tả trên, bạn có thể chụp ảnh màn hình và gửi cho AI để giải thích, hoặc hỏi trong bài viết cộng đồng.</div>
                     <div class="qr-modal-footer">
-                        <button class="menu_button primary" data-i18n="qra_btn_read" style="margin: 0 auto;" onclick="document.getElementById('qr-sort-inner-overlay').style.display='none'">已阅</button>
+                        <button class="menu_button primary" data-i18n="qra_btn_read" style="margin: 0 auto;" onclick="document.getElementById('qr-sort-inner-overlay').style.display='none'">Đã xem thông</button>
                     </div>
                 </div>
             </div>
 
             <div class="qr-modal-header" style="display: flex; justify-content: space-between; align-items: center;">
-                <span data-i18n="qra_sort_title">菜单分组排序管理</span>
+                <span data-i18n="qra_sort_title">Bảng Giao diện Sắp trật tự Vùng Chọn</span>
                 <div style="display: flex; gap: 12px; align-items: center;">
-                    <button id="qr-sort-preview-btn" class="qr-help-close-btn" data-i18n="[title]qra_label_preview" title="预览" style="color: #333 !important;">
+                    <button id="qr-sort-preview-btn" class="qr-help-close-btn" data-i18n="[title]qra_label_preview" title="Xem chiếu nháp hình trước" style="color: #333 !important;">
                         <i class="fa-solid fa-eye"></i>
                     </button>
                     <button class="qr-help-close-btn" onclick="document.getElementById('${Constants.ID_MODAL_OVERLAY}').classList.remove('visible')" style="color: #333 !important;">
@@ -1952,18 +1952,18 @@ function createSortModalHtml(settings) {
             <div style="background: rgba(0,0,0,0.03); padding: 10px; border-radius: 6px; margin-bottom: 10px;">
                 <div style="display: flex; justify-content: space-between; align-items: center;">
                     <div style="display: flex; align-items: center; gap: 6px;">
-                        <span style="font-weight: bold;" data-i18n="qra_sort_enable">开启自定义排序模式</span>
-                        <i class="fa-solid fa-circle-question qr-sort-help-toggle" id="${Constants.ID_SORT_HELP_TOGGLE}" style="cursor: pointer; color: #999; font-size: 14px;" data-i18n="[title]qra_help_tooltip" title="查看详细说明"></i>
+                        <span style="font-weight: bold;" data-i18n="qra_sort_enable">Bật hệ tự biên đạo (Customize Sort)</span>
+                        <i class="fa-solid fa-circle-question qr-sort-help-toggle" id="${Constants.ID_SORT_HELP_TOGGLE}" style="cursor: pointer; color: #999; font-size: 14px;" data-i18n="[title]qra_help_tooltip" title="Đọc kỹ lời giải trần"></i>
                     </div>
                     <label class="qr-toggle">
                         <input type="checkbox" id="${Constants.ID_SORT_MODE_TOGGLE}" ${isCustomChecked}>
                         <span class="qr-slider"></span>
                     </label>
                 </div>
-                <div id="qr-sort-inline-desc" style="margin-top: 10px; font-size: 12px; color: #666; white-space: pre-wrap; display: ${!settings.enableCustomSort ? 'block' : 'none'};" data-i18n="qra_sort_inline_desc">此模式允许您自定义排列QR菜单上的按钮顺序。
-关闭时，QR菜单上的按钮将会自适应排列（默认模式）。
-开启时，将会根据以下方式的排列显示在QR菜单上，因此你可以自行拖拽以下分组按钮进行自定义排列。
-您可以点击上方的 <i class="fa-solid fa-circle-question"></i> 图标查看更详细的说明，同时在进行自定义排序时，也可以通过点击右上角的 <i class="fa-solid fa-eye"></i> 图标来实时预览排序的效果。</div>
+                <div id="qr-sort-inline-desc" style="margin-top: 10px; font-size: 12px; color: #666; white-space: pre-wrap; display: ${!settings.enableCustomSort ? 'block' : 'none'};" data-i18n="qra_sort_inline_desc">Chế độ này cho phép bạn tùy chỉnh thứ tự các nút trên menu QR.
+Khi tắt, các nút trên menu QR sẽ tự động sắp xếp (chế độ mặc định).
+Khi bật, chúng sẽ hiển thị trên menu QR theo thứ tự dưới đây, vì vậy bạn có thể kéo thả các nhóm nút bên dưới để tự do sắp xếp.
+Bạn có thể nhấp vào biểu tượng <i class="fa-solid fa-circle-question"></i> bên trên để xem mô tả chi tiết hơn, và đồng thời khi tùy chỉnh sắp xếp, bạn cũng có thể nhấp vào biểu tượng <i class="fa-solid fa-eye"></i> ở góc trên bên phải để xem trước theo thời gian thực kết quả của việc sắp xếp.</div>
             </div>
 
             <div class="qr-sort-columns-container" id="qr-sort-columns-container" ${showDragArea}>
@@ -1977,11 +1977,11 @@ function createSortModalHtml(settings) {
         </div>`;
 }
 
-// 暴露给 ui.js 调用
+// Bóc mở quyền gọi đối chứng chéo cho nhánh ui.js
 window.quickReplyMenu = window.quickReplyMenu || {};
 window.quickReplyMenu.openSortModal = openSortModal;
 
-// 导出函数供 index.js 使用
+// Tách chức năng cấp ra cho cục index.js mần theo
 export function openSortModal() {
     const overlay = document.getElementById(Constants.ID_MODAL_OVERLAY);
     if (!overlay) return;
@@ -1992,37 +1992,37 @@ export function openSortModal() {
     overlay.innerHTML = createSortModalHtml(settings);
     overlay.classList.add('visible');
 
-    // 预览按钮点击事件
+    // Chân cắm bắt nhấp chuột của Nút Xem Chiếu Thử Nháp
     const previewBtn = document.getElementById('qr-sort-preview-btn');
     if (previewBtn) {
         previewBtn.addEventListener('click', () => {
-            // 1. 临时隐藏排序弹窗（保留内部状态）
+            // 1. Cuốn chiếu nấp tạm thời cái Bảng Khung điều hướng sắp xếp (Giữ lại mọi biến số sống)
             overlay.style.display = 'none';
 
-            // 2. 触发小火箭按钮打开菜单
+            // 2. Chọc lén Nút Khởi Động Rocket để xòe bảng QR (Menu) ra
             const rocketBtn = document.getElementById(Constants.ID_ROCKET_BUTTON);
             if (rocketBtn && !rocketBtn.classList.contains('active')) {
                 rocketBtn.click();
             }
 
-            // 3. 动态注入"退出预览"按钮到菜单底部
+            // 3. Phết nặn động một khối Nút "Hủy Tầm Nhìn Xem Nháp" thảy vội vào mép đít Menu
             const menu = document.getElementById(Constants.ID_MENU);
             let exitContainer = null;
 
             if (menu) {
-                // 创建底部包裹容器，确保居中与边框隔离
+                // Nhào lặn vỏ bọc đóng gói ngoài cản biên
                 exitContainer = document.createElement('div');
                 exitContainer.id = 'qr-preview-exit-container';
                 exitContainer.style.cssText = 'padding: 12px; display: flex; justify-content: center; align-items: center; border-top: 1px solid var(--qp-border); background: var(--qp-bg); flex-shrink: 0; z-index: 10;';
 
-                // 创建按钮本身
+                // Trổ vóc hình hài Nút bấm lõi
                 const exitBtn = document.createElement('button');
                 exitBtn.className = 'menu_button primary';
                 exitBtn.style.cssText = 'margin: 0; min-width: 140px; box-shadow: 0 4px 12px rgba(0,0,0,0.15);';
-                // 适配多语言翻译
-                exitBtn.textContent = typeof translate === 'function' ? translate('退出预览', 'qra_btn_exit_preview') : '退出预览';
+                // Áp cái tròng Ngữ Pháp dịch ngôn nếu không kẹt lỗi
+                exitBtn.textContent = typeof translate === 'function' ? translate('Hủy Xem Trước (Exit Preview)', 'qra_btn_exit_preview') : 'Thoát Xem Trước';
 
-                // 绑定点击事件：触发菜单关闭
+                // Ghim công tắc giật điện sập bảng Menu
                 exitBtn.addEventListener('click', () => {
                     if (rocketBtn && rocketBtn.classList.contains('active')) {
                         rocketBtn.click();
@@ -2032,71 +2032,71 @@ export function openSortModal() {
                 exitContainer.appendChild(exitBtn);
                 menu.appendChild(exitContainer);
 
-                // 4. 监听菜单的关闭事件（包括点按钮、点遮罩、按 ESC 等所有方式）
+                // 4. Móc một trinh sát (Observer) nằm vùng dò hành tung hễ Menu nổ tan biến đi (dù bằng thao tác ấn lung tung nào đi chăng nữa)
                 const observer = new MutationObserver((mutations) => {
                     mutations.forEach((mutation) => {
                         if (mutation.attributeName === 'class' && !menu.classList.contains('visible')) {
-                            // 菜单已完全关闭，恢复排序弹窗
+                            // Menu đã thu vòi, lật đật tung lại tấm màn Bảng Sắp xếp ra mặt tiền
                             overlay.style.display = '';
 
-                            // 清理动态注入的底部按钮
+                            // Hủy xác diệt tích cái vỏ Nút Động vứt mạn đít Menu
                             if (exitContainer && exitContainer.parentNode) {
                                 exitContainer.parentNode.removeChild(exitContainer);
                             }
-                            observer.disconnect(); // 释放内存
+                            observer.disconnect(); // Sa thải trinh sát giải tỏa bộ nhớ RAM
                         }
                     });
                 });
                 observer.observe(menu, { attributes: true });
             } else {
-                // 兜底逻辑：意外情况下直接恢复
+                // Hướng rủi ro, nát bảng Menu thì trực tiếp hiện lại bảng Sắp Xếp cho lành
                 overlay.style.display = '';
             }
         });
     }
 
-    // 开关事件绑定
+    // Móc dây gạt của công tắc chế độ Sắp Xếp
     document.getElementById(Constants.ID_SORT_MODE_TOGGLE).addEventListener('change', (e) => {
         settings.enableCustomSort = e.target.checked;
         saveSettings();
 
-        // 同步更新主页面上的设置按钮文本
+        // Mũi nhọn đâm ra màn Hình Mặt Tiền đồng thuận chỉnh dịch chữ Nút
         const mainSortBtn = document.getElementById(Constants.ID_BTN_OPEN_SORT);
         if (mainSortBtn) {
             if (settings.enableCustomSort) {
-                mainSortBtn.textContent = translate('已开启自定义排序模式', 'qra_sort_btn_enabled');
+                mainSortBtn.textContent = translate('Đã bật chế độ sắp xếp tùy chỉnh', 'qra_sort_btn_enabled');
                 mainSortBtn.removeAttribute('data-i18n');
             } else {
-                mainSortBtn.textContent = translate('设置', 'qra_btn_settings');
+                mainSortBtn.textContent = translate('Cài đặt', 'qra_btn_settings');
                 mainSortBtn.setAttribute('data-i18n', 'qra_btn_settings');
             }
         }
 
-        // 动态显示/隐藏帮助图标
+        // Bóp tròng đèn của Nút Xem Chỉ Dẫn (Dấu Hỏi tròn)
         const helpToggle = document.getElementById(Constants.ID_SORT_HELP_TOGGLE);
         if (helpToggle) {
             helpToggle.style.display = settings.enableCustomSort ? 'inline' : 'none';
         }
 
-        // 动态显示/隐藏内联说明文本 (当自定义排序禁用时，显示这段文本)
+        // Bóp tròng đèn của Cụm Chữ Tường Trình Kẹp Trong Bảng
         const inlineDesc = document.getElementById('qr-sort-inline-desc');
         if (inlineDesc) {
             inlineDesc.style.display = !settings.enableCustomSort ? 'block' : 'none';
         }
 
-        // 动态显示/隐藏拖拽区域
+        // Hiện nguyên khung Vuốt-Lôi Sắp Xếp
         const dragContainer = document.getElementById('qr-sort-columns-container');
         if (dragContainer) {
             dragContainer.style.display = settings.enableCustomSort ? 'flex' : 'none';
         }
 
-        // 如果开启自定义排序，渲染分组列表
+        // Nếu khai nòng Sắp Xếp rồi thì bốc số chép Khung Group
         if (settings.enableCustomSort) {
             renderSortLists(settings);
         }
     });
 
-    // 帮助图标点击弹窗
+    // Phát Bảng Hướng Dẫn Sắp Xếp bằng Dấu Hỏi
     const helpToggle = document.getElementById(Constants.ID_SORT_HELP_TOGGLE);
     if (helpToggle) {
         helpToggle.style.display = settings.enableCustomSort ? 'inline' : 'none';
@@ -2108,14 +2108,14 @@ export function openSortModal() {
         });
     }
 
-    // 只在开启自定义排序时渲染分组列表
+    // Luôn nhồi vẽ ngay từ đầu hễ Sắp Xếp Dân Độ được khai quang
     if (settings.enableCustomSort) {
         renderSortLists(settings);
     }
 }
 
-// --- 实时深度内存扫描仪 ---
-// 作用：绕过激活和显示限制，从酒馆底层内存中揪出所有隐藏、禁用或其他角色的按钮
+// --- Mắt thần Quét Lõi Bộ Nhớ Ngầm ---
+// Cốt tủy: Xẻ dọc bẻ mành xuyên tủng các Nút Dù nằm dạng Ẩn hay Nấp kẹp chết trong Hầm Đáy các Biến Tavern.
 function scanAllMemoryForButtons() {
     const resultMap = new Map();
     const stContext = window.SillyTavern?.getContext();
@@ -2126,7 +2126,7 @@ function scanAllMemoryForButtons() {
         resultMap.get(groupName).add(label);
     };
 
-    // 1. 扫描 QR V2 (包含当前加载但被设置为 Hidden 的分组)
+    // 1. Phóng tầm dò QR V2 (Sốc vô cả đống đã liệt kê vào màng Hidden bốc trần ra hết)
     if (window.quickReplyApi?.settings) {
         const scanQr = (setList) => {
             if (!Array.isArray(setList)) return;
@@ -2143,7 +2143,7 @@ function scanAllMemoryForButtons() {
         scanQr(window.quickReplyApi.settings.charConfig?.setList);
     }
 
-    // 2. 扫描 LWB / 小白X (包含被设置为 Disabled 的任务)
+    // 2. Chĩa ống dòm sang LWB / LittleWhiteBox - Tiểu Bạch X (Bới cả lũ Task chốt vĩnh viễn Disabled)
     if (window.XBTasks) {
         const getTasks = (source) => Array.isArray(source) ? source : [];
         getTasks(window.XBTasks.global).forEach(t => { if (t.name) addBtn(`LWB-global-${t.name}`, t.name.trim()); });
@@ -2156,25 +2156,25 @@ function scanAllMemoryForButtons() {
         getTasks(window.XBTasks.character).forEach(t => { if (t.name) addBtn(currentCharName, t.name.trim()); });
     }
 
-    // 3. 扫描酒馆内存中的所有角色 (挖掘其他角色的私有按钮)
+    // 3. Quét tát vét bùn Đáy Bể Nhân Vật Tavern (Tróc xương Moi xác luôn cục Nút Riêng Bị Ẩn)
     if (stContext?.characters) {
         stContext.characters.forEach(char => {
             const exts = char.data?.extensions || {};
 
-            // 挖掘其他角色的 LWB 任务
+            // Moi Nút Ngầm LWB ở thằng Nhân vật lân cận
             if (Array.isArray(exts.XBTasks)) {
                 exts.XBTasks.forEach(t => {
                     if (t.name) addBtn(char.name, t.name.trim());
                 });
             }
 
-            // 挖掘其他角色的 QRv2 配置 (尝试兼容不同的存储键名)
+            // Moi QRv2 cục cưng của Nhân Vật kề bên (Chuẩn bị súng đạn rà cho đủ dòng biến gán tên)
             const qrData = exts['quick-reply'] || exts['ch_quick_reply'] || exts['qr'];
             if (qrData) {
                 const setList = Array.isArray(qrData) ? qrData : (Array.isArray(qrData.setList) ? qrData.setList : null);
                 if (setList) {
                     setList.forEach(setObj => {
-                        const set = setObj.set || setObj; // 兼容不同结构
+                        const set = setObj.set || setObj; // Đỡ gãy cấu trúc bất đồng
                         if (set.name && Array.isArray(set.qrList)) {
                             set.qrList.forEach(qr => {
                                 if (qr.label) addBtn(set.name, qr.label.trim());
@@ -2189,13 +2189,13 @@ function scanAllMemoryForButtons() {
     return resultMap;
 }
 
-// --- 替换原有的 renderSortLists 方法 ---
+// --- Dùng hàm này cướp ngôi renderSortLists (Sáng thế bản nháp cũ) ---
 function renderSortLists(settings) {
-    // 1. 获取当前界面上激活的按钮
+    // 1. Kéo bọc Mảng Nút có mặt Sống tại Giao Diện
     const { scripts, standard } = fetchQuickReplies();
     const whitelist = Array.isArray(settings.whitelist) ? settings.whitelist : [];
 
-    // 白名单过滤：已在白名单中的项不应出现在排序管理中
+    // Chặn Vùng Trắng: Ai chui danh sách Danh Sách Trắng WhiteList thì cấm được điểm danh vào đây Sắp Xếp
     const generateId = (item) => {
         if (item.source === 'JSSlashRunner') return `JSR::${item.scriptId}`;
         if (item.source === 'QuickReplyV2') return `QRV2::${item.setName}`;
@@ -2222,10 +2222,10 @@ function renderSortLists(settings) {
         }
     });
 
-    // 2. 实时深度内存扫描，获取幽灵数据
+    // 2. Chạy Cỗ Máy Trinh Sát Lõi Bể Dữ Liệu Ngầm, gắp xác các Mảnh Nút Ma 
     const memoryScannerMap = scanAllMemoryForButtons();
 
-    // 3. 孤儿收容：发现新分组则补充到底部
+    // 3. Tế Bần Khống Cư Cú (Mồ côi): Có Mảnh Group nào lạ mới bốc vào nhồi chèn bọc lót Đít Danh sách
     groupDataMap.forEach((items, name) => {
         if (!settings.groupOrder.left.includes(name) && !settings.groupOrder.right.includes(name)) {
             const isScript = items.some(item => item.source === 'JSSlashRunner' || item.source === 'LittleWhiteBox');
@@ -2234,7 +2234,7 @@ function renderSortLists(settings) {
         }
     });
 
-    // 4. 渲染单列逻辑
+    // 4. Viết mã Vẩy Mực Khung Cột Liệt Kê
     const renderList = (colId, listKey) => {
         const listEl = document.getElementById(colId);
         listEl.innerHTML = '';
@@ -2243,21 +2243,21 @@ function renderSortLists(settings) {
             const groupItems = groupDataMap.get(name) || [];
             const isActive = groupItems.length > 0;
 
-            // 如果是幽灵分组，尝试从内存扫描结果中提取按钮
+            // Xử lý xác Mảnh Nút Ma (Nếu có bốc thì ẵm từ kết quả Memory)
             let ghostItems = [];
             if (!isActive && memoryScannerMap.has(name)) {
                 ghostItems = Array.from(memoryScannerMap.get(name)).map(label => ({ label }));
             }
 
-            // 决定当前应当显示的按钮数量
+            // Bấm quẻ chốt Cục Khối Hạt Số Lượng đếm 
             const displayCount = isActive ? groupItems.length : ghostItems.length;
 
-            // 创建分组容器
+            // Nặn Thân Khung Vỏ Vùng Group
             const groupContainer = document.createElement('div');
             groupContainer.className = 'qr-sort-group';
             if (!isActive) groupContainer.classList.add('ghost');
 
-            // 分组头部（可拖拽）
+            // Xẻ Đầu Mục Vùng Group (Chỗ để bấm bấu kéo lôi đi)
             const headerEl = document.createElement('div');
             headerEl.className = 'qr-sort-group-header';
             headerEl.draggable = true;
@@ -2265,7 +2265,7 @@ function renderSortLists(settings) {
 
             const itemCount = displayCount > 0 ? `<span class="qr-sort-item-count">${displayCount}</span>` : '';
 
-            // LWB分组统一加前缀以匹配白名单显示
+            // Hóa Cảnh LWB đúc khuôn Đồng Bộ Tên Thân Trắng
             let displayName = name;
             const isLwbActive = groupItems.some(item => item.source === 'LittleWhiteBox');
 
@@ -2284,7 +2284,7 @@ function renderSortLists(settings) {
                 }
             }
 
-            const delBtnHtml = !isActive ? `<button class="qr-sort-del-btn" title="${translate('删除记录', 'qra_sort_del_record')}"><i class="fa-solid fa-trash-can"></i></button>` : '';
+            const delBtnHtml = !isActive ? `<button class="qr-sort-del-btn" title="${translate('Xóa bỏ Bản Ghi (Record)', 'qra_sort_del_record')}"><i class="fa-solid fa-trash-can"></i></button>` : '';
 
             headerEl.innerHTML = `
                 <div style="display:flex; align-items:center; flex:1; overflow:hidden;">
@@ -2293,12 +2293,12 @@ function renderSortLists(settings) {
                     ${itemCount}
                 </div>
                 ${delBtnHtml}
-                <button class="qr-sort-expand-btn" title="${translate('展开/收起', 'qra_sort_expand_collapse')}">
+                <button class="qr-sort-expand-btn" title="${translate('Mở bung / Xếp gọn', 'qra_sort_expand_collapse')}">
                     <i class="fa-solid fa-chevron-down"></i>
                 </button>
             `;
 
-            // 【Bug 修复】为幽灵分组的删除按钮绑定 onclick 事件
+            // 【Gỡ Nút Kẹt Bug】Tra mỡ bôi trơn bắt dính Nút Thùng Rác của Các Xác Nút Ma Mồ Côi
             const delBtn = headerEl.querySelector('.qr-sort-del-btn');
             if (delBtn) {
                 delBtn.onclick = (e) => {
@@ -2311,11 +2311,11 @@ function renderSortLists(settings) {
                 };
             }
 
-            // 展开/收起按钮
+            // Gắn Khúc Nút Kéo Sổ Bung/Thun Vào
             const expandBtn = headerEl.querySelector('.qr-sort-expand-btn');
             const contentEl = document.createElement('div');
             contentEl.className = 'qr-sort-group-content';
-            contentEl.style.display = 'none'; // 默认收起
+            contentEl.style.display = 'none'; // Giấu kín mặc định 
 
             expandBtn.onclick = (e) => {
                 e.stopPropagation();
@@ -2324,7 +2324,7 @@ function renderSortLists(settings) {
                 expandBtn.querySelector('i').className = isExpanded ? 'fa-solid fa-chevron-down' : 'fa-solid fa-chevron-up';
             };
 
-            // --- 渲染内部按钮 ---
+            // --- Quét rải Khối Nút Nội Tạng ---
             const itemsToRender = isActive ? groupItems : ghostItems;
 
             if (itemsToRender.length > 0) {
@@ -2332,7 +2332,7 @@ function renderSortLists(settings) {
                     const btnEl = document.createElement('div');
                     btnEl.className = 'qr-sort-group-item';
 
-                    // 幽灵状态按钮样式弱化，以作视觉区分
+                    // Cạo phai màu, đục khung cho Lũ Nút Ma Nháp (Bản Không Sống/Disable)
                     if (!isActive) {
                         btnEl.style.opacity = '0.6';
                         btnEl.style.background = '#f9f9f9';
@@ -2342,18 +2342,18 @@ function renderSortLists(settings) {
                     contentEl.appendChild(btnEl);
                 });
             } else {
-                contentEl.innerHTML = `<div style="padding:10px; text-align:center; color:#999; font-size:12px;">${translate('该分组当前未在酒馆内存中找到有效按钮', 'qra_sort_group_empty')}</div>`;
+                contentEl.innerHTML = `<div style="padding:10px; text-align:center; color:#999; font-size:12px;">${translate('Nhóm Vùng Này chả thấy bốc ra mống Khối Nút Hữu Hiệu nào sót trong Tâm Mạch Tavern', 'qra_sort_group_empty')}</div>`;
             }
 
             groupContainer.appendChild(headerEl);
             groupContainer.appendChild(contentEl);
             listEl.appendChild(groupContainer);
 
-            // 绑定拖拽事件到头部
+            // Bủa lưới dăng bẫy bắt dính cơ màng Lôi/Vồ (Drag) quấn lấy Cổ Khung Đầu
             bindDragEvents(headerEl, groupContainer);
         });
 
-        // 为空列绑定接收拖拽的能力
+        // Áp chế Không Cột Trống rỗng cũng có Mảng Từ Trường tiếp ứng bám dính Nút Drag
         listEl.addEventListener('dragover', e => {
             e.preventDefault();
             const draggingGroup = document.querySelector('.qr-sort-group.dragging');
@@ -2372,15 +2372,15 @@ let draggedGroup = null;
 
 function bindDragEvents(headerEl, groupContainer) {
     // ==================================================
-    // 1. 保留原有的电脑端 HTML5 鼠标拖拽逻辑
+    // 1. Phép Mầu Drag Kéo của Desktop Chuột Cơ HTML5 (Giữ nguyên Tinh Nghĩa Cũ)
     // ==================================================
     headerEl.addEventListener('dragstart', (e) => {
         draggedItem = headerEl;
         draggedGroup = groupContainer;
 
-        // 核心修复：延迟添加 dragging 类。
-        // HTML5 拖拽会在触发的瞬间截取视觉快照作为 Ghost 影像。
-        // 延迟执行能确保浏览器截取到完整的可见图像，避免影像变成透明。
+        // Trục lấp kẽ hở chí tử: Bắt nhịp trì hoãn đắp Class Dragging.
+        // Khối Drag chuẩn HTML5 nổ máy ngay phát giật Cốp lấy bóng mờ.
+        // Gài trễ xíu để máy duyệt Web tráng bóng chụp ảnh nguyên thủy trước khi màng Ảo Ảnh kịp tụ thành Không Tàng Hình.
         setTimeout(() => {
             if (draggedGroup) draggedGroup.classList.add('dragging');
         }, 0);
@@ -2398,7 +2398,7 @@ function bindDragEvents(headerEl, groupContainer) {
         saveSortOrderFromDOM();
     });
 
-    // 核心修复：扩大拖放接收区。直接绑定到 groupContainer 而非 headerEl，吸附将极为精准。
+    // Mũi giáo đắc dụng Trục Hở: Nới rộng Vùng Điểm Rơi Bắt Đáp. Đè thẳng vào Khung Tổ Thay Vì Máng Đầu Mái Ngói headerEl, lực hút sẽ dính bén mượt mà vô hạn.
     groupContainer.addEventListener('dragover', (e) => {
         e.preventDefault();
         if (groupContainer === draggedGroup || !draggedGroup) return;
@@ -2417,7 +2417,7 @@ function bindDragEvents(headerEl, groupContainer) {
     });
 
     // ==================================================
-    // 2. 移动端纯 JS 触摸 (Touch) 接管逻辑
+    // 2. Chế Tạo Màng Lưới Phép Mới - Chiếm Quyền Cai Quản Touch ĐTDĐ thuần JS
     // ==================================================
     let touchTimer = null;
     let isTouchDragging = false;
@@ -2426,72 +2426,72 @@ function bindDragEvents(headerEl, groupContainer) {
     let cloneEl = null;
 
     headerEl.addEventListener('touchstart', (e) => {
-        // 防止误触内部的展开/删除按钮
+        // Đỡ đòn bấm hụt trượt qua Cụm Nút Xóa / Bành trướng 
         if (e.target.closest('button')) return;
 
         const touch = e.touches[0];
         startX = touch.clientX;
         startY = touch.clientY;
 
-        // 设定 300ms 长按才激活拖拽，区分普通滑动
+        // Đúc neo dằn 300 mili giây Nhấn Lún để Phân định Rạch Ròi Vuốt Lướt Trượt và Nhấc Lên Lôi Kéo
         touchTimer = setTimeout(() => {
             isTouchDragging = true;
             draggedItem = headerEl;
             draggedGroup = groupContainer;
             groupContainer.classList.add('dragging');
 
-            // 1. 创建跟随手指的视觉克隆体
+            // 1. Phép Độn Hồn Cắt Bóng Bám Ngón Tay
             cloneEl = groupContainer.cloneNode(true);
             cloneEl.classList.remove('dragging');
             cloneEl.classList.add('qr-sort-drag-clone');
 
-            // 获取初始位置锁定
+            // Định Vị Chết Tâm Bản Thể Ban Sơ
             const rect = groupContainer.getBoundingClientRect();
             cloneEl.style.width = `${rect.width}px`;
             cloneEl.style.left = `${rect.left}px`;
             cloneEl.style.top = `${rect.top}px`;
             document.body.appendChild(cloneEl);
 
-            // 提供微弱震动反馈
+            // Rùng mình hồi chuông nhỏ tống phản lực (Vibration Mobile)
             if (navigator.vibrate) navigator.vibrate(50);
         }, 300);
     }, { passive: true });
 
     headerEl.addEventListener('touchmove', (e) => {
         if (!isTouchDragging) {
-            // 如果滑动超过一定距离，取消拖拽判定
+            // Sẩy ngón xô ngang lỡ chót quá Trớn Dài, xóa lệnh kết ấn Khởi Kéo
             if (Math.abs(e.touches[0].clientY - startY) > 10 || Math.abs(e.touches[0].clientX - startX) > 10) {
                 clearTimeout(touchTimer);
             }
             return;
         }
 
-        // 拦截浏览器的默认滚动行为
+        // Chặn Luồng Tự Cuộn Nền Lăn của Trình Duyệt Máy
         if (e.cancelable) e.preventDefault();
 
         const touch = e.touches[0];
 
-        // 2. 更新克隆体位置 (使用 transform 保证 GPU 流畅渲染)
+        // 2. Phù Phép Định Hướng Kéo Bóng Phân Thân (Xài Kháng Mạch Xoắn Transform Ép GPU Nuột Nà Bậc Nhất)
         if (cloneEl) {
             const deltaX = touch.clientX - startX;
             const deltaY = touch.clientY - startY;
             cloneEl.style.transform = `translate(${deltaX}px, ${deltaY}px) scale(1.02)`;
         }
 
-        // 3. 核心魔法变更：使用 visibility 替代 display: none
-        // 这样原元素仍然占据空间，下方的列表不会塌陷上移，彻底解决跳变现象
+        // 3. Phép Tẩy Hồn Đổi Vị Siêu Cấp: Ném Tròng Trắng visibility Lên Đè Bẹp Lệnh Trốn Thoát display: none
+        // Nhờ thế, Băng Khối xác thịt gốc vẫn đè chiếm Không Gian móng ngói, dàn dưới không Tụt Lở văng ngược lên Bơm giật Khung. Xóa tan tận rễ Vụ Nháy Giật Nhảy Bậc.
         groupContainer.style.visibility = 'hidden';
         const target = document.elementFromPoint(touch.clientX, touch.clientY);
         groupContainer.style.visibility = '';
 
         if (!target) return;
 
-        // 4. 终极防报错：确保全局节点未被意外清空
+        // 4. Bảo chứng Cầu Chì Anti-Crash Cấp Đỉnh: Đảm Bất Trắc Chống Cháy Đám Mây Mảnh Văng DOM Đứt Đoạn Lạc Trôi
         if (!draggedGroup || !draggedGroup.parentNode) return;
 
         const targetHeader = target.closest('.qr-sort-group-header');
         if (targetHeader && targetHeader !== headerEl) {
-            // 碰到了另一个分组，计算位置并挤兑
+            // Va trúng sườn chóp mục Đầu Mục khác, chia phép đo nạc Chẻ Ngôi Vị chen đè qua mặt
             const targetGroup = targetHeader.closest('.qr-sort-group');
             const listEl = targetGroup.parentNode;
             const rect = targetHeader.getBoundingClientRect();
@@ -2504,10 +2504,10 @@ function bindDragEvents(headerEl, groupContainer) {
                     listEl.insertBefore(draggedGroup, targetGroup.nextSibling);
                 }
             } catch (err) {
-                // 吞掉极少数极端情况下的并发渲染错误
+                // Ém Nhẹp Đóng Nắp Hũ Che Giấu Nốt Các Cực Hạn Xác Suất Nghẽn Ren DOM Kỳ Dị
             }
         } else {
-            // 碰到了空白列（跨列拖拽支持）
+            // Va lọt qua lổ mẻ Mạn Hông rỗng của Vách Trống Khác (Lướt Xuyên Bảng Dòng)
             const targetList = target.closest('.qr-sort-list');
             if (targetList && !targetList.contains(draggedGroup)) {
                 try {
@@ -2523,7 +2523,7 @@ function bindDragEvents(headerEl, groupContainer) {
             isTouchDragging = false;
             groupContainer.classList.remove('dragging');
 
-            // 5. 销毁克隆体
+            // 5. Thổi tro Cúng Hồn Phân Thân Ám Ảo Bay Cháy Hủy Diệt
             if (cloneEl) {
                 cloneEl.remove();
                 cloneEl = null;
@@ -2552,7 +2552,7 @@ function saveSortOrderFromDOM() {
     saveSettings();
 }
 
-// --- 公告弹窗逻辑 ---
+// --- Khối Hàm Nổi Lên Thông Cáo Báo Đại Sảnh ---
 function createAnnouncementModalHtml() {
     const lang = getCurrentLocale();
     const content = announcementDocs[lang] || announcementDocs['en'] || announcementDocs['zh-cn'];
@@ -2563,7 +2563,7 @@ function createAnnouncementModalHtml() {
             ${content}
         </div>
         <div class="qr-modal-footer">
-            <button id="${Constants.ID_BTN_CLOSE_ANNOUNCEMENT}" class="menu_button primary" data-i18n="qra_btn_read">已阅</button>
+            <button id="${Constants.ID_BTN_CLOSE_ANNOUNCEMENT}" class="menu_button primary" data-i18n="qra_btn_read">Đã Đọc Hiểu</button>
         </div>
     </div>`;
 }
@@ -2572,27 +2572,27 @@ export function showAnnouncementModalIfNeeded() {
     const settings = window.SillyTavern.getContext().extensionSettings[Constants.EXTENSION_NAME];
     const ANNOUNCEMENT_KEY = 'announcement_read_20260428';
 
-    // 如果已经阅读过了，直接跳过
+    // Đọc trôi êm xuôi qua rồi thì Thôi Bỏ Kế Tiết Bỏ Mặc Qua Bên
     if (settings[ANNOUNCEMENT_KEY]) return;
 
     const overlay = document.getElementById(Constants.ID_MODAL_OVERLAY);
     if (!overlay) return;
 
-    // 生成并显示弹窗
+    // Giương lều đúc bệ chiếu nặn Khung
     overlay.innerHTML = createAnnouncementModalHtml();
     overlay.classList.add('visible');
 
-    // 当展现弹窗的瞬间立刻标记为已读并保存设置
-    // 这样即便用户不点关闭而是直接刷新网页，弹窗下次也不会再出现了
+    // Chớp mặt Trình Diện Khung Đồng nghĩa Bấm mộc Lỗ Thủng Chốt Bằng cờ True chìm ngầm
+    // Cứu mạng Dân chơi không Chịu Click Tắt mà F5 thì bảng Báo Mộng này Không Quay về Làm Ám Ảnh lại Nữa
     settings[ANNOUNCEMENT_KEY] = true;
     saveSettings();
 
-    // 重新应用翻译，确保"已阅"按钮根据系统语言变换
+    // Tưới lại lớp Sơn Ngôn Ngữ, Cục Nút "Đã Đọc" biến thân theo Hệ Chữ Gốc App
     import('../../../i18n.js').then(({ applyLocale }) => {
         if (typeof applyLocale === 'function') applyLocale();
     });
 
-    // 绑定关闭事件
+    // Cắm móc cài Xóa Che Sập Tắt Bảng
     const btnClose = document.getElementById(Constants.ID_BTN_CLOSE_ANNOUNCEMENT);
     if (btnClose) {
         btnClose.onclick = () => {
@@ -2601,7 +2601,7 @@ export function showAnnouncementModalIfNeeded() {
     }
 }
 
-// --- 设置项独立说明弹窗逻辑 ---
+// --- Góc Khai Đất Cắm Biển Bảng Giải Mã Trợ Giúp Phân Thân Từng Thiết Lập Đơn Lẻ ---
 function createSettingHelpModalHtml(helpKey) {
     let titleI18n = '';
     let defaultTitle = '';
@@ -2610,37 +2610,37 @@ function createSettingHelpModalHtml(helpKey) {
 
     if (helpKey === 'autoshrink') {
         titleI18n = 'qra_card_autoshrink_title';
-        defaultTitle = '按钮自动折叠';
+        defaultTitle = 'Tự động thu gọn nút';
         contentI18n = 'qra_setting_help_autoshrink';
-        defaultContent = '启用该功能后，插件将会将聊天输入框上方的按钮区域都折叠起来。\n\n而当点击鼠标移动到或者手动点击输入框区域时，则又会自动展开显示所有按钮。\n\n该功能可以与白名单按钮搭配使用，因为只有白名单按钮（或输入助手按钮）才会在聊天输入框上方显示。如果大家使用QR助手时，不了解或者没有使用白名单功能以及输入助手则可以不用开启。';
+        defaultContent = 'Sau khi bật tính năng này, tiện ích sẽ tự động thu gọn tất cả các nút ở khu vực phía trên khung nhập liệu chat.\n\nVà khi bạn rê chuột tới hoặc nhấn vào khung nhập liệu thì chúng sẽ tự động mở lại để hiển thị mọi nút.\n\nTính năng này có thể phối hợp nhịp nhàng với tính năng Danh Sách Trắng, bởi vì chỉ các Nút nằm bên trong Danh Sách Trắng (Hoặc Khối Nút Công Cụ Nhập Liệu) mới lơ lửng tồn đọng hiện hành ngự trên hộp nhập. Các bạn nào khi xài QR Assistant mà không xài Danh Sách Trắng hay Nút Nhập Liệu thì tắt luôn nó cho khỏi lướng vướng sinh thừa.';
     } else if (helpKey === 'backdrop') {
         titleI18n = 'qra_card_backdrop_title';
-        defaultTitle = '背景模糊效果';
+        defaultTitle = 'Hiệu ứng làm mờ nền';
         contentI18n = 'qra_setting_help_backdrop';
-        defaultContent = '启用该功能后，当每次点击聊天输入框右边发送按钮左边的QR助手按钮打开菜单面板时，背景都会进行模糊处理。\n\n打个比方，这就跟手机切后台一样，切后台时桌面是模糊的。该功能实现的就是这种效果，打开菜单面板时把背景模糊化处理。\n\n因此，该功能有利于减少视觉疲劳（推荐开启）。';
+        defaultContent = 'Sau khi tính năng này bật lên, mỗi lần bạn click con biểu tượng QR Assistant nằm tuốt luốt góc phải sát vách mép hộp gửi để bung Menu, toàn thể Phông Nền Phía Dưới Lưng Bảng Panel sẽ phủ một tấm màng sương mù làm nhòe lấp vệt xóa nhòa ảnh (Blur effect).\n\nNôm na cũng cỡ việc bạn ấn Điện Thoại trượt ra dạt Hậu Cảnh Ngoài, tấm áo Desktop chìm trong lớp nhòe Blur Kính Mờ vậy. Ý Nghĩa Cốt Bán của Tính Năng này sẽ đục chìm hình dạng Nền Hậu Cảnh Sau để đánh lóa làm nhòe Mờ Ảo Tựa Màn Kính Mờ.\n\nChính vì lý do đó, mục đích của việc kích Mở Tính năng này nhằm cứu mắt bạn thoát khỏi sự rối rắm, nhiễu loạn thị giác (Đề Cử Kích Hoạt Tính Năng Này Lên).';
     } else if (helpKey === 'combined') {
         titleI18n = 'qra_card_combined_title';
-        defaultTitle = '合并快速回复';
+        defaultTitle = 'Gộp Phản hồi nhanh';
         contentI18n = 'qra_setting_help_combined';
-        defaultContent = '启用该功能后，将会使聊天输入框上方的按钮都紧贴在一块，而不是每个脚本/QR的内的按钮都单独为一行。\n\n该功能也是搭配白名单功能使用的，因为只有移入白名单的按钮才会保留显示在聊天输入框区域上方。\n\n这个功能实际上就是酒馆原生的快速回复中的"合并快速回复"，是一个开关，作用完全一样（大家在快速回复或者QR助手中开启/禁用该开关都是可以的，这两个地方是双向同步更新的）。\n\n在QR助手也重复做这个开关主要是方便大家进行启用/禁用。';
+        defaultContent = 'Gạt công tắc tính năng này thì hằng hà sa số đám Nút ở trên nóc Khung Nhập sẽ dồn cục dính chùm chen chúc kề sát xạt vào nhau. Chúng sẽ không bị cô lập một dòng chia lẻ riêng biệt làm đứt gãy đội hình.\n\nTính Năng này là tay vịn kề sát phối kết Đôi Nhịp Cùng Mảnh Tính Năng Danh Sách Trắng. Bởi Vốn chỉ Đám Nút bị nhốt trong Vòng Danh Sách Trắng mới có Vé Ló Đầu Tồn Tại Ngự Trên Khung Hộp Nhập Liệu.\n\nNguyên lai hình hài cội rễ thì Cái Nút Công Tắc này Chính là sao y bản chính nguyên cục Nút Công Tắc "Gộp Phản Hồi Nhanh" của Phản Hồi Nhanh Nội Tại Gốc Quán Rượu, Bản Chất y Đúc chả Khác 1 Li (Mọi người Gạt Tắt/Mở ở Khung Phản Hồi Nhanh Gốc hay Kéo ở ngay bên Cài Đặt của Phụ Bản QR Assistant này đều Ăn Khớp Nhịp Nhàng Khai Đóng Liên Kết Xuyên Suốt Lẫn Nhau).\n\nCó nó đặt thò lò ra tại phần Cài đặt Của QR Assistant chủ ý Giúp Các bạn Ấn Cho Đỡ Vướng, Tiện Tay Nhanh Gọn.';
     } else if (helpKey === 'sort') {
         titleI18n = 'qra_card_sort_title';
-        defaultTitle = '菜单按钮排序';
+        defaultTitle = 'Sắp xếp nút trên menu';
         contentI18n = 'qra_setting_help_sort';
-        defaultContent = '启用该功能后，QR助手的菜单中的按钮将会按照您设置的顺序位置进行排序。\n\n该功能默认禁用，禁用时右插件设计的逻辑对菜单中的按钮进行自适应排序。\n\n插件设计的排序逻辑是比较符合大多数人的习惯，一般也够用了，当然也欢迎大家按照自己的习惯进行自定义排序。\n\n该功能启用后，选项右侧的"设置"按钮将会变为"已开启自定义排序模式"。';
+        defaultContent = 'Mở tính năng này, bộ Hàng Nút ngụ ở Menu QR Assistant sẽ nghe theo Lệnh Triệu Hoán Thứ Tự Do bạn Sắp Đặt Rành Rọt.\n\nMặc Định thì Nút Bấm Khóa Kín. Hễ Bị Khóa Kín Tắt Ngỏm thì Mảng Logic Lập Trình trong Bụng Plugin này sẽ Gánh Vai Trò Tự Động Định Hình Thứ Bậc Dàn Nút Hàng Lối Trên Menu Tùy Nghi.\n\nKhối Logic Tự Động Xếp Hàng Hóa ra lại Trúng Tim Đen Ăn Khớp Tâm Ý Đám Đông Ngôn Ngữ Hành Vi Chung Của Người Dùng Lâu Năm Nhất, xài là cũng đủ mượt mà lắm rồi. Cố nhiên, Luôn Trải Thảm Trọng Vọng Mời Bạn Lôi Theo Phong Cách Riêng Tự Biên Tự Diễn Xếp Hình Sắp Xếp.\n\nTính Năng Này Mà Chạy Thông Lên Thì Ngay Tại Chữ Nút Cạnh Chót Khóa Tính Năng Đó Nó Hiện Hẳn Ra Cụm Câu: "Đã Bật Chế Độ Sắp Xếp Tùy Chỉnh".';
     }
 
     return `
     <div class="qr-modal-box" id="${Constants.ID_MODAL_SETTING_HELP}" style="max-width: 500px;">
         <div class="qr-modal-header" style="display: flex; justify-content: space-between; align-items: center;">
             <span data-i18n="${titleI18n}">${defaultTitle}</span>
-            <button class="qr-help-close-btn" onclick="document.getElementById('${Constants.ID_MODAL_OVERLAY}').classList.remove('visible')" title="关闭" data-i18n="[title]qra_title_close" style="color: #333 !important;">
+            <button class="qr-help-close-btn" onclick="document.getElementById('${Constants.ID_MODAL_OVERLAY}').classList.remove('visible')" title="Đóng bảng hiển thị" data-i18n="[title]qra_title_close" style="color: #333 !important;">
                 <i class="fa-solid fa-xmark"></i>
             </button>
         </div>
         <div style="padding: 15px 10px; overflow-y: auto; max-height: 50vh; line-height: 1.6; font-size: 14px; white-space: pre-wrap; color: #333;" data-i18n="${contentI18n}">${defaultContent}</div>
         <div class="qr-modal-footer">
-            <button id="${Constants.ID_BTN_CLOSE_SETTING_HELP}" class="menu_button primary" data-i18n="qra_btn_read" style="margin: 0 auto;">已阅</button>
+            <button id="${Constants.ID_BTN_CLOSE_SETTING_HELP}" class="menu_button primary" data-i18n="qra_btn_read" style="margin: 0 auto;">Đã Đọc và Thông Suốt</button>
         </div>
     </div>`;
 }
@@ -2652,7 +2652,7 @@ function openSettingHelpModal(helpKey) {
     overlay.innerHTML = createSettingHelpModalHtml(helpKey);
     overlay.classList.add('visible');
 
-    // 重新应用翻译，确保刚生成的弹窗内容被正确转换为所选语言
+    // Chạy lại cỗ máy thông dịch (Tránh lỡ dịp ngôn ngữ chưa kịp phủ vỏ bọc lên khung mới đúc)
     import('../../../i18n.js').then(({ applyLocale }) => {
         if (typeof applyLocale === 'function') applyLocale();
     });
