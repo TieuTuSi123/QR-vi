@@ -181,17 +181,17 @@ export function createSettingsHtml() {
             <div class="inline-drawer-content">
 
                 <!-- Thanh Menu -->
-                <div id="${Constants.ID_SETTINGS_TAB_BAR}" class="qr-settings-tab-bar">
+                <div id="${Constants.ID_SETTINGS_TAB_BAR}" class="qr-settings-tab-bar" style="gap: 2px;">
                     <!-- Phần tử con chạy (Slider) -->
                     <div class="qr-tab-glider"></div>
 
-                    <div class="qr-settings-tab-item active" data-tab="${Constants.ID_PAGE_MAIN}" id="${Constants.ID_TAB_MAIN}">
+                    <div class="qr-settings-tab-item active" data-tab="${Constants.ID_PAGE_MAIN}" id="${Constants.ID_TAB_MAIN}" style="padding: 10px 4px; font-size: 0.85em; letter-spacing: -0.2px;">
                         <i class="fa-solid fa-cog"></i> <span data-i18n="qra_tab_main">Cài đặt chính</span>
                     </div>
-                    <div class="qr-settings-tab-item" data-tab="${Constants.ID_PAGE_WHITELIST}" id="${Constants.ID_TAB_WHITELIST}">
+                    <div class="qr-settings-tab-item" data-tab="${Constants.ID_PAGE_WHITELIST}" id="${Constants.ID_TAB_WHITELIST}" style="padding: 10px 4px; font-size: 0.85em; letter-spacing: -0.2px;">
                         <i class="fa-solid fa-list-check"></i> <span data-i18n="qra_tab_whitelist">Danh sách trắng</span>
                     </div>
-                    <div class="qr-settings-tab-item" data-tab="${Constants.ID_PAGE_ICON}" id="${Constants.ID_TAB_ICON}">
+                    <div class="qr-settings-tab-item" data-tab="${Constants.ID_PAGE_ICON}" id="${Constants.ID_TAB_ICON}" style="padding: 10px 4px; font-size: 0.85em; letter-spacing: -0.2px;">
                         <i class="fa-solid fa-icons"></i> <span data-i18n="qra_tab_icon">Biểu tượng nút</span>
                     </div>
                 </div>
